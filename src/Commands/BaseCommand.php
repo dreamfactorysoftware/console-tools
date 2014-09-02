@@ -18,6 +18,8 @@
  */
 namespace DreamFactory\Library\Console\Commands;
 
+use DreamFactory\Library\Console\Components\ConfigFile;
+use DreamFactory\Library\Console\Enums\AnsiCodes;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -25,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Adds some additional functionality to the Command class
  */
-class ToolCommand extends Command
+class BaseCommand extends Command
 {
     //******************************************************************************
     //* Members
@@ -140,6 +142,15 @@ class ToolCommand extends Command
     protected function _elapsed()
     {
         return microtime( true ) - $this->_startTime;
+    }
+
+    /**
+     * @return ConfigFile
+     */
+    public function getConfig()
+    {
+        /** @noinspection PhpUndefinedMethodInspection */
+        return $this->getApplication()->getConfig();
     }
 
     /**

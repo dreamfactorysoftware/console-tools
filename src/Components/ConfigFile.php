@@ -19,6 +19,7 @@
 namespace DreamFactory\Library\Console\Components;
 
 use Kisma\Core\Exceptions\FileSystemException;
+use Kisma\Core\Utility\Option;
 
 /**
  * Reads and write a DreamFactory configuration file
@@ -36,12 +37,16 @@ class ConfigFile
     /**
      * @type string The name of the directory containing our configuration
      */
-    const DEFAULT_CONFIG_FILE = 'options.json';
+    const DEFAULT_CONFIG_SUFFIX = '.options.json';
 
     //******************************************************************************
     //* Members
     //******************************************************************************
 
+    /**
+     * @type string The name/ID of this configuration
+     */
+    protected $_name = null;
     /**
      * @type array The current configuration
      */
@@ -58,6 +63,10 @@ class ConfigFile
      * @type string The absolute path to the actual configuration file
      */
     protected $_configFilePath = null;
+    /**
+     * @type bool If true, the config needs saving
+     */
+    protected $_dirty = false;
 
     //******************************************************************************
     //* Methods
@@ -66,13 +75,26 @@ class ConfigFile
     /**
      * Creates a configuration file component
      *
-     * @param string $file The configuration file name. Defaults to options.json
+     * @param string $name The configuration name, or ID. File will be stored in [name].config.json
      * @param string $path The path to the configuration file. Defaults to ~/.dreamfactory
      */
-    public function __construct( $file = null, $path = null )
+    public function __construct( $name, $path = null )
     {
-        $this->_configFile = $file;
+        $this->_name = $name;
         $this->_configPath = $path;
+        $this->_config = array();
+
+        //  Load the file...
+        $this->load();
+    }
+
+    //  Save junk if dirty...
+    public function __destruct()
+    {
+        if ( $this->_dirty )
+        {
+            $this->save();
+        }
     }
 
     /**
@@ -95,10 +117,12 @@ class ConfigFile
             }
         }
 
-        $this->_configFilePath = $_path . DIRECTORY_SEPARATOR . ( $this->_configFile ?: static::DEFAULT_CONFIG_FILE );
+        $this->_configFilePath = $_path . DIRECTORY_SEPARATOR . $this->_name . static::DEFAULT_CONFIG_SUFFIX;
 
         if ( !file_exists( $this->_configFilePath ) )
         {
+            $this->setOption( 'db-servers', array() );
+
             return $this->save( 'I\'m Mr. Meeseeks! Look at me!!' );
         }
 
@@ -133,19 +157,18 @@ class ConfigFile
 
         //  Work with local copy
         $_config = $this->_config;
+        $_timestamp = date( 'c', $_time = time() );
 
         //  Timestamp this save
-        $_config['_timestamp'] = date( 'c', $_time = time() );
+        $this->setOption( '_timestamp', $_timestamp );
 
         //  Add a comment to the configuration file
         if ( $comment )
         {
-            if ( !isset( $_config['_comments'] ) )
-            {
-                $_config['_comments'] = array();
-            }
+            $_comments = $this->getOption( '_comments', array() );
+            $_comments[] = array($_timestamp => $comment);
 
-            $_config['_comments'][] = array($_config['_timestamp'] => $comment);
+            $this->setOption( '_comments', $_comments );
         }
 
         //  Convert to JSON and store
@@ -157,6 +180,41 @@ class ConfigFile
             throw new FileSystemException( 'Error saving configuration file: ' . $this->_configFilePath );
         }
 
-        return $this->_config = $_config;
+        return $this->_config;
     }
+
+    /**
+     * @param string                     $name         The option to get
+     * @param string|number|array|object $defaultValue The default value of the option
+     *
+     * @return mixed
+     */
+    public function getOption( $name, $defaultValue = null )
+    {
+        return Option::get( $this->_config, $name, $defaultValue );
+    }
+
+    /**
+     * @param string                     $name  The option to set
+     * @param string|number|array|object $value The new option value
+     *
+     * @return array|string
+     */
+    public function setOption( $name, $value = null )
+    {
+        if ( false === json_encode( $value, JSON_UNESCAPED_SLASHES ) || JSON_ERROR_NONE != json_last_error() )
+        {
+            throw new \InvalidArgumentException( 'The value supplied cannot be converted to JSON: ' . json_last_error_msg() );
+        }
+
+        $this->_dirty = true;
+
+        return Option::set( $this->_config, $name, $value );
+    }
+
+    protected function _createDefaultConfig()
+    {
+
+    }
+
 }
