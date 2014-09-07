@@ -20,6 +20,7 @@ namespace DreamFactory\Library\Console;
 
 use DreamFactory\Library\Console\Components\ConfigFile;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A command that reads/writes a JSON configuration file
@@ -77,18 +78,6 @@ class BaseApplication extends Application
         $_name = isset( $argv, $argv[0] ) ? $argv[0] : $this->getShortName();
 
         return sprintf( '<info>%s v%s:</info> %s</comment>', $_name, $this->getVersion(), $this->getName() );
-    }
-
-    /**
-     * Writes the program header
-     *
-     * @param string $header The header to write, otherwise the default is printed
-     * @param bool   $newline
-     * @param int    $type
-     */
-    public function writeHeader( $header = null, $newline = true, $type = OutputInterface::OUTPUT_NORMAL )
-    {
-        $this->_output->write( $_header, $newline, $type );
     }
 
     /**
