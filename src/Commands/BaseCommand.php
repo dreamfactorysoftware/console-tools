@@ -27,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Adds some additional functionality to the Command class
  */
-class BaseCommand extends Command
+class BaseCommand extends ContainerAwareCommand
 {
     //******************************************************************************
     //* Members

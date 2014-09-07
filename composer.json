@@ -13,7 +13,8 @@
 	"require":           {
 		"php":             ">=5.4.6,<5.6",
 		"kisma/kisma":     "~0.2@dev",
-		"symfony/console": "~2.4@stable"
+		"symfony/console": "~2.4@stable",
+		"symfony/framework-bundle": "~2.4@stable"
 	},
 	"minimum-stability": "dev",
 	"require-dev":       {
