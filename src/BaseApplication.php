@@ -20,6 +20,7 @@ namespace DreamFactory\Library\Console;
 
 use DreamFactory\Library\Console\Components\ConfigFile;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A command that reads/writes a JSON configuration file
@@ -45,6 +46,10 @@ class BaseApplication extends Application
      * @type string Path for the config file
      */
     protected $_configPath;
+    /**
+     * @type string The short application name
+     */
+    protected $_shortName;
 
     //******************************************************************************
     //* Methods
@@ -62,6 +67,24 @@ class BaseApplication extends Application
         $this->_configure( $config );
     }
 
+    /** @inheritdoc */
+    public function getLongVersion()
+    {
+        if ( 'UNKNOWN' === $this->getName() && 'UNKNOWN' === $this->getVersion() )
+        {
+            return parent::getLongVersion();
+        }
+
+        $_name = isset( $argv, $argv[0] ) ? $argv[0] : $this->getShortName();
+
+        return sprintf( '<info>%s v%s:</info> %s</comment>', $_name, $this->getVersion(), $this->getName() );
+    }
+
+    /**
+     * Configure the command
+     *
+     * @param array $config Configuration settings
+     */
     protected function _configure( array $config )
     {
         foreach ( $config as $_key => $_value )
@@ -132,6 +155,26 @@ class BaseApplication extends Application
     public function setConfigPath( $configPath )
     {
         $this->_configPath = $configPath;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getShortName()
+    {
+        return $this->_shortName;
+    }
+
+    /**
+     * @param string $shortName
+     *
+     * @return BaseApplication
+     */
+    public function setShortName( $shortName )
+    {
+        $this->_shortName = $shortName;
 
         return $this;
     }

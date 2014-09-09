@@ -166,8 +166,7 @@ class ConfigFile
         if ( $comment )
         {
             $_comments = $this->getOption( '_comments', array() );
-            $_comments[] = array($_timestamp => $comment);
-
+            $_comments[$_timestamp] = $comment;
             $this->setOption( '_comments', $_comments );
         }
 
@@ -215,9 +214,12 @@ class ConfigFile
         return Option::set( $this->_config, $name, $value );
     }
 
+    /**
+     * @return array
+     */
     protected function _createDefaultConfig()
     {
-
+        return array();
     }
 
 }
