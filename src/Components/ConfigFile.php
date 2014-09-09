@@ -180,6 +180,9 @@ class ConfigFile
             throw new FileSystemException( 'Error saving configuration file: ' . $this->_configFilePath );
         }
 
+        //  Try and lock the file down...
+        @chmod( $this->_configFilePath, 0400 );
+
         return $this->_config;
     }
 
