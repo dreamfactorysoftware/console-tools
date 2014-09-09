@@ -20,7 +20,6 @@ namespace DreamFactory\Library\Console;
 
 use DreamFactory\Library\Console\Components\ConfigFile;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A command that reads/writes a JSON configuration file

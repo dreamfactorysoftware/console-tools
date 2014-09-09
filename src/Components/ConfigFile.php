@@ -180,7 +180,7 @@ class ConfigFile
         }
 
         //  Try and lock the file down...
-        @chmod( $this->_configFilePath, 0400 );
+        @chmod( $this->_configFilePath, 0600 );
 
         return $this->_config;
     }
