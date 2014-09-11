@@ -18,13 +18,8 @@
  */
 namespace DreamFactory\Library\Console\Components;
 
-use DreamFactory\Library\Console\BaseApplication;
-use DreamFactory\Tools\Fabric\Utility\CommandHelper;
-use Kisma\Core\Exceptions\FileSystemException;
-use Kisma\Core\Utility\Option;
-
 /**
- * A simple registry for DreamFactory application options
+ * A simple registry
  */
 class Registry
 {
@@ -35,217 +30,125 @@ class Registry
     /**
      * @type string The name of the directory containing our configuration
      */
-    const DEFAULT_REGISTRY_BASE = '.dreamfactory';
+    const DEFAULT_CONFIG_BASE = '.dreamfactory';
     /**
      * @type string The name of the directory containing our configuration
      */
-    const DEFAULT_REGISTRY_SUFFIX = '.registry.json';
+    const DEFAULT_CONFIG_SUFFIX = '.options.json';
+    /**
+     * @type string The format to use when creating date strings
+     */
+    const DEFAULT_TIMESTAMP_FORMAT = 'c';
 
     //******************************************************************************
     //* Members
     //******************************************************************************
 
     /**
-     * @type string The name/ID of this configuration
+     * @type string
      */
-    protected $_name = null;
+    protected $_registryKey = null;
     /**
-     * @type array The current configuration
+     * @type array
      */
-    protected $_config = null;
-    /**
-     * @type string The configuration file path, no file.
-     */
-    protected $_configPath = null;
-    /**
-     * @type string The configuration file name, no path.
-     */
-    protected $_configFile = null;
-    /**
-     * @type string The absolute path to the actual configuration file
-     */
-    protected $_configFilePath = null;
-    /**
-     * @type bool If true, the config needs saving
-     */
-    protected $_dirty = false;
+    protected $_contents = array();
 
     //******************************************************************************
     //* Methods
     //******************************************************************************
 
     /**
-     * Creates a configuration file component
+     * @param string $entryId     The entry within the registry
+     * @param bool   $autoCreate  Inits the hive if the key isn't found
+     * @param bool   $returnValue If found, and this is true, the value stored at key $registryKey is returned, otherwise TRUE
      *
-     * @param string $name The configuration name, or ID. File will be stored in [name].config.json
-     * @param string $path The path to the configuration file. Defaults to ~/.dreamfactory
+     * @internal param array $registry
+     * @internal param string $registryKey
+     * @return bool|array
      */
-    public function __construct( $name, $path = null )
+    public function hasEntry( $entryId, $autoCreate = false, $returnValue = false )
     {
-        $this->_name = $name;
-        $this->_configPath = $path;
-        $this->_config = array();
-
-        //  Load the file...
-        $this->load();
-    }
-
-    //  Save junk if dirty...
-    public function __destruct()
-    {
-        if ( $this->_dirty )
+        if ( !array_key_exists( $entryId, $this->_contents ) || isset( $this->_contents[$entryId] ) )
         {
-            $this->save();
+            if ( !$autoCreate )
+            {
+                return true;
+            }
+
+            $this->_contents[$entryId] = $this->_initializeContents();
         }
+
+        return $returnValue ? $this->_contents[$entryId] : true;
     }
 
     /**
-     * Loads the current configuration
+     * Returns the value stored under the registry key $registryKey. Returns FALSE on not-found
+     *
+     * @param string $registryKey
+     * @param string $entryId
+     * @param bool   $autoCreate Auto-create the entry if it does not exist
+     *
+     * @return bool|array
+     */
+    public function getEntry( $entryId, $autoCreate = true )
+    {
+        return $this->hasEntry( $entryId, $autoCreate, true );
+    }
+
+    /**
+     * @param string $registryKey
+     * @param string $entryId
+     * @param array  $properties
+     *
+     * @return $this
+     */
+    public function addEntry( $entryId, array $properties = array() )
+    {
+        $_entry = $this->getEntry( $entryId, true );
+
+        $this->_contents[$entryId] = array_merge( $_entry, $properties );
+
+        return $this;
+    }
+
+    /**
+     * Removes a registry from the config
+     *
+     * @param string $registryKey
+     * @param string $entryId
+     *
+     * @return bool
+     */
+    public function removeRegistryEntry( $registryKey, $entryId )
+    {
+        if ( !$this->hasEntry( $entryId, false ) )
+        {
+            return false;
+        }
+
+        unset( $this->_contents[$registryKey][$entryId] );
+
+        return true;
+    }
+
+    /**
+     * @param array $registry An existing registry
      *
      * @return array
-     * @throws FileSystemException
      */
-    public function load()
+    protected function _mergeRegistry( array $registry = array() )
     {
-        if ( empty( $this->_configPath ) )
-        {
-            if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
-            {
-                $_user = posix_getpwuid( posix_getuid() );
-                $this->_configFilePath = $_user['dir'] . DIRECTORY_SEPARATOR . static::DEFAULT_REGISTRY_BASE;
-            }
-            else
-            {
-                $_home = getenv( 'HOME' );
-                if ( empty( $_home ) )
-                {
-                    $_home = getcwd();
-                }
-
-                $this->_configPath = $_home . DIRECTORY_SEPARATOR . static::DEFAULT_REGISTRY_BASE;
-            }
-
-            if ( empty( $this->_configPath ) )
-            {
-                $this->_configPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . static::DEFAULT_REGISTRY_BASE;
-            }
-        }
-
-        $_path = $this->_configPath;
-
-        if ( !is_dir( $_path ) )
-        {
-            if ( false === mkdir( $_path, 0777, true ) )
-            {
-                throw new FileSystemException( 'Unable to create directory: ' . $_path );
-            }
-        }
-
-        $this->_configFilePath = $_path . DIRECTORY_SEPARATOR . $this->_name . static::DEFAULT_REGISTRY_SUFFIX;
-
-        if ( !file_exists( $this->_configFilePath ) )
-        {
-            $this->setOption( 'servers', array() );
-
-            return $this->save( 'Automatically created by "fabric" tool' );
-        }
-
-        if ( false === ( $_config = json_decode( file_get_contents( $this->_configFilePath ), true ) ) || JSON_ERROR_NONE != json_last_error() )
-        {
-            $this->_configFilePath = null;
-            throw new \RuntimeException( 'Invalid or missing JSON in file "' . $this->_configFilePath . '".' );
-        }
-
-        return $this->_config = array_merge( $this->_config, $_config );
+        return array_merge( $this->_contents, $registry );
     }
 
     /**
-     * Saves the configuration file
-     *
-     * @param string $comment A comment to add to the configuration file in the "_comment" property
-     *
-     * @return array
-     * @throws FileSystemException
+     * @return array The default registry values
      */
-    public function save( $comment = null )
-    {
-        if ( !$this->_configFilePath )
-        {
-            throw new \LogicException( 'No configuration file has been loaded. Cannot save.' );
-        }
-
-        if ( empty( $this->_config ) )
-        {
-            $this->_config = array();
-        }
-
-        //  Work with local copy
-        $_config = $this->_config;
-        $_timestamp = CommandHelper::getCurrentTimestamp();
-
-        //  Timestamp this save
-        $this->setOption( '_timestamp', $_timestamp );
-
-        //  Add a comment to the configuration file
-        if ( $comment )
-        {
-            $_comments = $this->getOption( '_comments', array() );
-            $_comments[$_timestamp] = $comment;
-            $this->setOption( '_comments', $_comments );
-        }
-
-        //  Convert to JSON and store
-        $_json = json_encode( $this->_config, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
-
-        if ( false === file_put_contents( $this->_configFilePath, $_json ) )
-        {
-            $this->_configFilePath = null;
-            throw new FileSystemException( 'Error saving configuration file: ' . $this->_configFilePath );
-        }
-
-        //  Try and lock the file down...
-        @chmod( $this->_configFilePath, 0600 );
-
-        return $this->_config;
-    }
-
-    /**
-     * @param string                     $name         The option to get
-     * @param string|number|array|object $defaultValue The default value of the option
-     *
-     * @return mixed
-     */
-    public function getOption( $name, $defaultValue = null )
-    {
-        return Option::get( $this->_config, $name, $defaultValue );
-    }
-
-    /**
-     * @param string                     $name  The option to set
-     * @param string|number|array|object $value The new option value
-     *
-     * @return array|string
-     */
-    public function setOption( $name, $value = null )
-    {
-        if ( false === json_encode( $value, JSON_UNESCAPED_SLASHES ) || JSON_ERROR_NONE != json_last_error() )
-        {
-            throw new \InvalidArgumentException( 'The value supplied cannot be converted to JSON: ' . json_last_error_msg() );
-        }
-
-        $this->_dirty = true;
-
-        return Option::set( $this->_config, $name, $value );
-    }
-
-    /**
-     * @return array
-     */
-    protected function _createDefaultConfig()
+    protected function _initializeContents()
     {
         return array(
-            BaseCommand::get();
+            '_comments'  => array(),
+            '_timestamp' => date( 'Ymd HiS' ),
         );
     }
-
 }
