@@ -18,13 +18,15 @@
  */
 namespace DreamFactory\Library\Console\Components;
 
+use DreamFactory\Library\Console\BaseApplication;
+use DreamFactory\Tools\Fabric\Utility\CommandHelper;
 use Kisma\Core\Exceptions\FileSystemException;
 use Kisma\Core\Utility\Option;
 
 /**
- * Reads and write a DreamFactory configuration file
+ * A simple registry for DreamFactory application options
  */
-class ConfigFile
+class Registry
 {
     //******************************************************************************
     //* Constants
@@ -33,11 +35,11 @@ class ConfigFile
     /**
      * @type string The name of the directory containing our configuration
      */
-    const DEFAULT_CONFIG_BASE = '.dreamfactory';
+    const DEFAULT_REGISTRY_BASE = '.dreamfactory';
     /**
      * @type string The name of the directory containing our configuration
      */
-    const DEFAULT_CONFIG_SUFFIX = '.options.json';
+    const DEFAULT_REGISTRY_SUFFIX = '.registry.json';
 
     //******************************************************************************
     //* Members
@@ -105,9 +107,31 @@ class ConfigFile
      */
     public function load()
     {
-        $_user = posix_getpwuid( posix_getuid() );
-        $_path =
-            $this->_configPath ?: ( isset( $_user, $_user['dir'] ) ? $_user['dir'] : getcwd() ) . DIRECTORY_SEPARATOR . static::DEFAULT_CONFIG_BASE;
+        if ( empty( $this->_configPath ) )
+        {
+            if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
+            {
+                $_user = posix_getpwuid( posix_getuid() );
+                $this->_configFilePath = $_user['dir'] . DIRECTORY_SEPARATOR . static::DEFAULT_REGISTRY_BASE;
+            }
+            else
+            {
+                $_home = getenv( 'HOME' );
+                if ( empty( $_home ) )
+                {
+                    $_home = getcwd();
+                }
+
+                $this->_configPath = $_home . DIRECTORY_SEPARATOR . static::DEFAULT_REGISTRY_BASE;
+            }
+
+            if ( empty( $this->_configPath ) )
+            {
+                $this->_configPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . static::DEFAULT_REGISTRY_BASE;
+            }
+        }
+
+        $_path = $this->_configPath;
 
         if ( !is_dir( $_path ) )
         {
@@ -117,13 +141,13 @@ class ConfigFile
             }
         }
 
-        $this->_configFilePath = $_path . DIRECTORY_SEPARATOR . $this->_name . static::DEFAULT_CONFIG_SUFFIX;
+        $this->_configFilePath = $_path . DIRECTORY_SEPARATOR . $this->_name . static::DEFAULT_REGISTRY_SUFFIX;
 
         if ( !file_exists( $this->_configFilePath ) )
         {
-            $this->setOption( 'db-servers', array() );
+            $this->setOption( 'servers', array() );
 
-            return $this->save( 'I\'m Mr. Meeseeks! Look at me!!' );
+            return $this->save( 'Automatically created by "fabric" tool' );
         }
 
         if ( false === ( $_config = json_decode( file_get_contents( $this->_configFilePath ), true ) ) || JSON_ERROR_NONE != json_last_error() )
@@ -157,7 +181,7 @@ class ConfigFile
 
         //  Work with local copy
         $_config = $this->_config;
-        $_timestamp = date( 'c', $_time = time() );
+        $_timestamp = CommandHelper::getCurrentTimestamp();
 
         //  Timestamp this save
         $this->setOption( '_timestamp', $_timestamp );
@@ -219,7 +243,9 @@ class ConfigFile
      */
     protected function _createDefaultConfig()
     {
-        return array();
+        return array(
+            BaseCommand::get();
+        );
     }
 
 }
