@@ -1,0 +1,45 @@
+{
+	"name":          "fabric",
+	"description":   "DreamFactory Fabric(tm) Manager",
+	"known_servers": {
+		"db":  [
+			{
+				"host":              "localhost",
+				"port":              3306,
+				"username":          null,
+				"password":          null,
+				"driver":            "mysql",
+				"connection_string": null,
+				"settings":          {
+					"dump": {},
+					"pdo":  {}
+				}
+			}
+		],
+		"web": [
+			{
+				"host":     "localhost",
+				"port":     80,
+				"ssl_port": 443,
+				"username": null,
+				"password": null,
+				"settings": {
+					"dump": {},
+					"pdo":  {}
+				}
+			}
+		],
+		"app": [
+			{
+				"host":     "localhost",
+				"port":     null,
+				"ssl_port": null,
+				"username": null,
+				"password": null, "settings": {
+				"dump": {},
+				"pdo":  {}
+			}
+			}
+		]
+	}
+}
