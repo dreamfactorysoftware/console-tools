@@ -16,4 +16,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace DreamFactory\Tools\Fabric;
+namespace DreamFactory\Library\Console\Interfaces;
+
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
+/**
+ * Something that acts like a registry
+ */
+interface RegistryLike extends ParameterBagInterface
+{
+    //******************************************************************************
+    //* Methods
+    //******************************************************************************
+
+    /**
+     * @param string $templateFile The absolute path to a JSON file
+     *
+     * @return RegistryLike
+     */
+    public static function createFromTemplate( $templateFile );
+}
+ 

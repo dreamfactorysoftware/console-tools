@@ -18,6 +18,7 @@
  */
 namespace DreamFactory\Library\Console\Components;
 
+use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use Kisma\Core\Exceptions\FileSystemException;
 
 /**
@@ -36,7 +37,7 @@ class ConfigFile
     /**
      * @type string The name of the directory containing our configuration
      */
-    const DEFAULT_CONFIG_SUFFIX = '.options.json';
+    const DEFAULT_CONFIG_SUFFIX = '.config.json';
     /**
      * @type string The format to use when creating date strings
      */
@@ -51,25 +52,17 @@ class ConfigFile
      */
     protected $_name = null;
     /**
-     * @type string The configuration file path, no file.
+     * @type string The path in which to load/save this config sans file name
      */
     protected $_configPath = null;
     /**
-     * @type string The configuration file name, no path.
+     * @type RegistryLike
      */
-    protected $_configFile = null;
-    /**
-     * @type string The absolute path to the actual configuration file
-     */
-    protected $_configFilePath = null;
+    protected $_registry;
     /**
      * @type bool If true, the config needs saving
      */
     protected $_dirty = false;
-    /**
-     * @type AppRegistry
-     */
-    protected $_registry = null;
 
     //******************************************************************************
     //* Methods
@@ -78,14 +71,16 @@ class ConfigFile
     /**
      * Creates a configuration file component
      *
-     * @param string $name The configuration name, or ID. File will be stored in [name].config.json
-     * @param string $path The path to the configuration file. Defaults to ~/.dreamfactory
+     * @param string $name       The configuration name, or ID. File will be stored in [name].config.json
+     * @param string $configPath The /path/to/the/store/config sans file name
+     * @param array  $parameters Any parameters to add to the config
+     *
+     * @internal param string $path The path to the configuration file. Defaults to ~/.dreamfactory
      */
-    public function __construct( $name, $path = null )
+    public function __construct( $name, $configPath = null, array $parameters = array() )
     {
         $this->_name = $name;
-        $this->_configPath = $path;
-        $this->_config = array();
+        $this->_configPath = $configPath;
 
         //  Load the file...
         $this->load();
@@ -97,23 +92,18 @@ class ConfigFile
      */
     public function __destruct()
     {
-        if ( $this->_dirty )
-        {
-            $this->save();
-        }
+        $this->save();
     }
 
     /**
      * Loads the current configuration
      *
-     * @return array
+     * @return RegistryLike
      * @throws FileSystemException
      */
     public function load()
     {
-        $this->_configFilePath = $this->_locateRegistry();
-
-        return $this->_registry = new AppRegistry( $this->_configFilePath );
+        return $this->_registry = Registry::createFromTemplate( $this->_locateRegistry() );
     }
 
     /**
@@ -121,7 +111,6 @@ class ConfigFile
      *
      * @param string $comment A comment to add to the configuration file in the "_comment" property
      *
-     * @return array
      * @throws FileSystemException
      */
     public function save( $comment = null )
@@ -129,16 +118,6 @@ class ConfigFile
         if ( null === $this->_registry )
         {
             throw new \LogicException( 'The save() method may not be called before the load() method.' );
-        }
-
-        if ( !$this->_configFilePath )
-        {
-            $this->_configFilePath = $this->_locateRegistry();
-        }
-
-        if ( !count( $this->_registry->all() ) )
-        {
-            $this->_registry->add( $this->_initializeRegistry() );
         }
 
         //  Work with local copy
@@ -156,18 +135,11 @@ class ConfigFile
         }
 
         //  Convert to JSON and store
-        $_json = json_encode( $this->_config, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
-
-        if ( false === file_put_contents( $this->_configFilePath, $_json ) )
-        {
-            $this->_configFilePath = null;
-            throw new FileSystemException( 'Error saving configuration file: ' . $this->_configFilePath );
-        }
+        $_jsonFile = new JsonFile( $this->_locateRegistry() );
+        $_jsonFile->write( $this->_registry->all() );
 
         //  Try and lock the file down...
-        @chmod( $this->_configFilePath, 0600 );
-
-        return $this->_config;
+        @chmod( $_jsonFile->getFilePath(), 0600 );
     }
 
     /**
@@ -177,9 +149,9 @@ class ConfigFile
      * @return $this
      * @throws \Kisma\Core\Exceptions\FileSystemException
      */
-    public function addRegistry( $registryKey, array $properties = array() )
+    public function addNode( $id, array $properties = array() )
     {
-        $this->_registry->set( $registryKey, $this->_mergeRegistry( $this->_registry->all(), $properties ) );
+        $this->_registry->add( array($id => $properties) );
 
         return $this;
     }
@@ -191,58 +163,56 @@ class ConfigFile
      *
      * @return bool
      */
-    public function removeRegistry( $registryKey )
+    public function removeNode( $id )
     {
-        if ( !$this->hasRegistry( $registryKey ) )
+        if ( $this->_registry->has( $id ) )
         {
-            return false;
+            $this->_registry->set( $id, null );
+
+            return true;
         }
 
-        $this->_registry->remove( $registryKey );
-
-        return true;
+        return false;
     }
 
     /**
-     * @param string $registryKey The master key within the registry
-     * @param bool   $autoCreate  Inits the hive if the key isn't found
-     * @param bool   $returnValue If found, and this is true, the value stored at key $registryKey is returned, otherwise TRUE
+     * Returns the value stored under the registry key $registryKey. Returns FALSE on not-found
+     *
+     * @param string $key
+     * @param bool   $autoCreate
+     * @param bool   $returnValue
      *
      * @return bool|array
      */
-    public function hasRegistry( $registryKey, $autoCreate = true, $returnValue = false )
+    public function getNode( $id, $autoCreate = true, $returnValue = false )
     {
-        if ( false === ( $_registry = $this->_registry->has( $registryKey ) ) )
+        if ( !$this->_registry->has( $id ) )
         {
             if ( !$autoCreate )
             {
                 return false;
             }
 
-            //  Default to an array
-            $this->_registry->set( $registryKey, array() );
+            $this->_registry->set( $id, array() );
         }
 
-        return $returnValue ? $this->_registry[$registryKey] : true;
+        return $this->_registry->get( $id );
     }
 
     /**
      * Returns the value stored under the registry key $registryKey. Returns FALSE on not-found
      *
-     * @param string $registryKey
+     * @param string $key
      * @param bool   $autoCreate
      * @param bool   $returnValue
      *
-     * @return bool|array
+     * @return $this
      */
-    public function getRegistry( $registryKey, $autoCreate = true, $returnValue = false )
+    public function setNode( $id, array $properties = array() )
     {
-        if ( !$this->_registry->has( $registryKey ) )
-        {
-            return $this->_registry->get( $registryKey );
-        }
+        $this->_registry->set( $id, $properties );
 
-        return $this->_registry->get( $registryKey );
+        return $this;
     }
 
     /**
@@ -250,11 +220,48 @@ class ConfigFile
      *
      * @return array
      */
-    protected function _mergeRegistry( array $registry = array() )
+    public function mergeNode( $id, array $properties = array() )
     {
-        $_original = $this->_registry->all();
+        $_data = array_merge( $this->getNode( $id ), $properties );
 
-        return array_merge( $_original, $registry );
+        return $this->setNode( $id, $_data );
+    }
+
+    /**
+     * @param string $nodeId     The node ID
+     * @param string $entryId    The entry ID under node
+     * @param array  $properties The properties of the entry
+     *
+     * @return array|bool
+     */
+    public function addNodeEntry( $nodeId, $entryId, array $properties = array() )
+    {
+        $_node = $this->getNode( $nodeId, true, true );
+        $_node[$entryId] = $properties;
+
+        return $this->setNode( $nodeId, $_node );
+    }
+
+    /**
+     * @param string $nodeId
+     * @param string $entryId
+     *
+     * @return bool True if deleted, false if not found
+     */
+    public function removeNodeEntry( $nodeId, $entryId )
+    {
+        $_node = $this->getNode( $nodeId, true, true );
+
+        if ( array_key_exists( $entryId, $_node ) )
+        {
+            unset( $_node[$entryId] );
+            $this->setNode( $nodeId, $_node );
+
+            return true;
+        }
+
+        return false;
+
     }
 
     /**
@@ -278,10 +285,7 @@ class ConfigFile
 
         if ( !file_exists( $fileName ) )
         {
-            if ( false === file_put_contents( $fileName, json_encode( $this->_initializeRegistry(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) ) )
-            {
-                throw new FileSystemException( 'Unable to create registry file: ' . $fileName );
-            }
+            Registry::createFromFile( $fileName, true );
         }
 
         //  Exists
@@ -289,18 +293,25 @@ class ConfigFile
     }
 
     /**
-     * Find and returns the path to my file
+     * Find and returns the path to my file, taking $this->_configPath into account
      */
     protected function _locateRegistry()
     {
-        if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
+        if ( !empty( $this->_configPath ) && is_dir( $this->_configPath ) )
         {
-            $_user = posix_getpwuid( posix_getuid() );
-            $_path = ( isset( $_user, $_user['dir'] ) ? $_user['dir'] : getcwd() );
+            $_path = $this->_configPath;
         }
         else
         {
-            $_path = sys_get_temp_dir();
+            if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
+            {
+                $_user = posix_getpwuid( posix_getuid() );
+                $_path = ( isset( $_user, $_user['dir'] ) ? $_user['dir'] : getcwd() );
+            }
+            else
+            {
+                $_path = sys_get_temp_dir();
+            }
         }
 
         //  This is where the file will live
@@ -308,13 +319,5 @@ class ConfigFile
 
         //  Doesn't exist? Create it...
         return $this->_ensureFileExists( $_path, $_path . DIRECTORY_SEPARATOR . $this->_name . static::DEFAULT_CONFIG_SUFFIX );
-    }
-
-    /**
-     * @return array The default registry values
-     */
-    protected function _initializeRegistry()
-    {
-        return new AppRegistry();
     }
 }
