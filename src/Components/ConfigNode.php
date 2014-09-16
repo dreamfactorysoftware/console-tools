@@ -19,6 +19,8 @@
 namespace DreamFactory\Library\Console\Components;
 
 use DreamFactory\Library\Console\Interfaces\ConfigNodeLike;
+use DreamFactory\Tools\Fabric\Utility\CommandHelper;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
@@ -31,17 +33,9 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
     //******************************************************************************
 
     /**
-     * @type string The name of the directory containing our configuration
+     * @type string Our meta node
      */
-    const DEFAULT_CONFIG_BASE = '.dreamfactory';
-    /**
-     * @type string The name of the directory containing our configuration
-     */
-    const DEFAULT_CONFIG_SUFFIX = '.registry.json';
-    /**
-     * @type string The format to use when creating date strings
-     */
-    const DEFAULT_TIMESTAMP_FORMAT = 'c';
+    const META_DATA_KEY = '_meta';
 
     //******************************************************************************
     //* Members
@@ -55,10 +49,6 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
      * @type string My parent node id, if any
      */
     protected $_parentId = null;
-    /**
-     * @type int
-     */
-    protected $_currentKeyIndex = 0;
 
     //******************************************************************************
     //* Methods
@@ -96,11 +86,144 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
      */
     public function addComment( $comment )
     {
-        $_node = $this->get( $this->_nodeId );
-        $_node['_meta']['comments'] = array_merge( $_node['_meta']['comments'], $this->_createComment( $comment, false ) );
-        $this->set( $this->_nodeId, $_node );
+        $_node = $this->getMetaData();
+        $_node['comments'] = array_merge( $_node['comments'], $this->createEntryComment( $comment, false ) );
+        $this->setMetaData( $_node );
 
         return $this;
+    }
+
+    /**
+     * Gets the hive's metadata
+     *
+     * @return ConfigNodeLike|array
+     */
+    public function getMetaData()
+    {
+        if ( !$this->has( static::META_DATA_KEY ) )
+        {
+            $this->set( static::META_DATA_KEY, $this->getDefaultMetaData() );
+        }
+
+        return $this->get( static::META_DATA_KEY );
+    }
+
+    /**
+     * Sets the hive's metadata
+     *
+     * @param array|ConfigNodeLike $metaData
+     *
+     * @return $this
+     */
+    public function setMetaData( array $metaData = array() )
+    {
+        $this->set( static::META_DATA_KEY, $metaData );
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefaultMetaData()
+    {
+        $_metaData = array(
+            'nodeId'     => $this->_nodeId,
+            'parentId'   => $this->_parentId,
+            'comments'   => $this->createEntryComment( 'Creation', false ),
+            'updated_at' => CommandHelper::getCurrentTimestamp(),
+        );
+
+        return new static( $this->_nodeId, static::META_DATA_KEY, $_metaData );
+    }
+
+    /**
+     * @return array|ConfigNodeLike
+     */
+    public function getDefaultSchema()
+    {
+        return $this->getDefaultMetaData();
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefaultNodeSchema()
+    {
+        return array();
+    }
+
+    /**
+     * Locates an entry within a node
+     *
+     * @param string $entryId     The entry within the node
+     * @param bool   $autoCreate  Inits the node and entry if the keys aren't found
+     * @param bool   $returnValue If found, and this is true, the entry is returned, otherwise TRUE
+     *
+     * @return bool|array
+     */
+    public function hasEntry( $entryId, $autoCreate = false, $returnValue = false )
+    {
+        if ( !$this->has( $entryId ) )
+        {
+            if ( !$autoCreate )
+            {
+                throw new ParameterNotFoundException( $entryId );
+            }
+
+            $this->add( array($entryId => $this->getDefaultNodeSchema()) );
+        }
+
+        return $returnValue ? $this->get( $entryId ) : true;
+    }
+
+    /**
+     * Returns the value stored under the registry key $registryKey. Returns FALSE on not-found
+     *
+     * @param string $entryId
+     * @param bool   $autoCreate Auto-create the entry if it does not exist
+     *
+     * @internal param string $nodeId
+     * @return bool|array
+     */
+    public function getEntry( $entryId, $autoCreate = true )
+    {
+        return $this->hasEntry( $entryId, $autoCreate, true );
+    }
+
+    /**
+     * @param string $entryId
+     * @param array  $parameters
+     *
+     * @return $this
+     */
+    public function addEntry( $entryId, array $parameters = array() )
+    {
+        $_node = $this->hasEntry( $entryId, true, true );
+        $this->set( $entryId, array_merge( $_node, $parameters ) );
+
+        return $this;
+    }
+
+    /**
+     * Removes a registry from the config
+     *
+     * @param string $nodeId
+     * @param string $entryId
+     *
+     * @return bool
+     */
+    public function removeEntry( $nodeId, $entryId )
+    {
+        if ( false === ( $_node = $this->hasEntry( $entryId, false, true ) ) )
+        {
+            return false;
+        }
+
+        unset( $_node[$nodeId] );
+        $this->set( $nodeId, $_node );
+
+        return true;
     }
 
     /**
@@ -108,35 +231,9 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
      *
      * @return array
      */
-    protected function _createComment( $comment )
+    public function createEntryComment( $comment )
     {
-        return array(date( static::DEFAULT_TIMESTAMP_FORMAT ) => $comment);
-    }
-
-    /**
-     * @param bool   $wrapNode If FALSE, the contents of the node._meta is returned. Otherwise nodeId[node._meta] is returned
-     * @param string $parentId My parent node id, if any
-     *
-     * @return array An array suitable for "$this->add()"
-     */
-    public function getDefaultSchema( $wrapNode = true, $parentId = null )
-    {
-        $this->_parentId = $parentId;
-
-        $_node = array(
-            '_meta' => array(
-                'parentId'   => $parentId,
-                'comments'   => $this->_createComment( 'Creation', false ),
-                'updated_at' => date( static::DEFAULT_TIMESTAMP_FORMAT ),
-            )
-        );
-
-        if ( $wrapNode )
-        {
-            $_node = array($this->_nodeId => $_node);
-        }
-
-        return $_node;
+        return array(CommandHelper::getCurrentTimestamp() => $comment);
     }
 
     /**
@@ -148,22 +245,11 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
     }
 
     /**
-     * @param string $parentId
-     *
-     * @return ConfigNode
-     */
-    public function setParentId( $parentId )
-    {
-        $this->_parentId = $parentId;
-
-        return $this;
-    }
-
-    /**
      * @return string The id of this node
      */
     public function getNodeId()
     {
         return $this->_nodeId;
     }
+
 }

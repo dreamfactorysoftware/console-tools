@@ -16,30 +16,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace DreamFactory\Library\Console\Interfaces;
+namespace DreamFactory\Library\Console\Enums;
 
-interface ConfigNodeLike
+use Kisma\Core\Enums\SeedEnum;
+
+/**
+ * ConfigKeys
+ * Enumerations of pre-defined application config keys
+ */
+class ConfigKeys extends SeedEnum
 {
     //******************************************************************************
-    //* Methods
+    //* Constants
     //******************************************************************************
 
     /**
-     * Returns an array that will become the contents of a new configuration node
-     *
-     * @return array|ConfigNodeLike
+     * @type int
      */
-    public function getDefaultSchema();
+    const TYPE_UNDEFINED = 0;
+    /**
+     * @type int
+     */
+    const TYPE_SCALAR = 1;
+    /**
+     * @type int
+     */
+    const TYPE_ARRAY = 2;
+    /**
+     * @type int
+     */
+    const TYPE_OBJECT = 3;
+    /**
+     * @type int
+     */
+    const TYPE_DIRECTORY = 4;
 
     /**
-     * Returns the parent node id of this node, if any.
-     *
-     * @return string the id of my parent node
+     * @type string The level key for storing servers
      */
-    public function getParentId();
-
+    const SERVER_ID = 'server-id';
     /**
-     * @return string The id of this node
+     * @type string The top-level key for storing db servers
      */
-    public function getNodeId();
+    const DB_SERVERS = 'db-servers';
+    /**
+     * @type string The top-level key for storing web servers
+     */
+    const WEB_SERVERS = 'web-servers';
+    /**
+     * @type string The top-level key for storing app servers
+     */
+    const APP_SERVERS = 'app-servers';
 }

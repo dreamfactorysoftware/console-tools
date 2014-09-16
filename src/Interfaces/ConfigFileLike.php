@@ -16,4 +16,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace DreamFactory\Tools\Fabric;
+namespace DreamFactory\Library\Console\Interfaces;
+
+/**
+ * Something that acts like a config file
+ */
+interface ConfigFileLike
+{
+    //******************************************************************************
+    //* Methods
+    //******************************************************************************
+
+    /**
+     * @param string $templateFile The absolute path to a JSON file
+     *
+     * @return ConfigFileLike
+     */
+    public static function createFromFile( $templateFile );
+}
+ 

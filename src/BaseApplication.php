@@ -18,7 +18,8 @@
  */
 namespace DreamFactory\Library\Console;
 
-use DreamFactory\Library\Console\Components\ConfigFile;
+use DreamFactory\Library\Console\Components\Registry;
+use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use Symfony\Component\Console\Application;
 
 /**
@@ -30,25 +31,26 @@ use Symfony\Component\Console\Application;
 class BaseApplication extends Application
 {
     //******************************************************************************
+    //* Constants
+    //******************************************************************************
+
+    /**
+     * @type string The name of this application
+     */
+    const APP_NAME = null;
+
+    //******************************************************************************
     //* Members
     //******************************************************************************
 
     /**
-     * @type ConfigFile The config file manager
+     * @type string A json file containing a template for creating a new registry
      */
-    protected $_config;
+    protected $_registryTemplate;
     /**
-     * @type string The name/id of the config
+     * @type RegistryLike
      */
-    protected $_configName;
-    /**
-     * @type string Path for the config file
-     */
-    protected $_configPath;
-    /**
-     * @type string The short application name
-     */
-    protected $_shortName;
+    protected $_registry;
 
     //******************************************************************************
     //* Methods
@@ -74,7 +76,7 @@ class BaseApplication extends Application
             return parent::getLongVersion();
         }
 
-        $_name = isset( $argv, $argv[0] ) ? $argv[0] : $this->getShortName();
+        $_name = static::APP_NAME ?: ( isset( $argv, $argv[0] ) ? $argv[0] : basename( __CLASS__ ) );
 
         return sprintf( '<info>%s v%s:</info> %s</comment>', $_name, $this->getVersion(), $this->getName() );
     }
@@ -94,86 +96,48 @@ class BaseApplication extends Application
             }
         }
 
-        $this->_config = new ConfigFile( $this->_configName ?: $this->getName(), $this->_configPath );
-
-    }
-
-    /**
-     * @return ConfigFile
-     */
-    public function getConfig()
-    {
-        return $this->_config;
-    }
-
-    /**
-     * @param ConfigFile $configFile
-     *
-     * @return BaseApplication
-     */
-    public function setConfig( ConfigFile $configFile )
-    {
-        $this->_config = $configFile;
-
-        return $this;
+        if ( !empty( $this->_registryTemplate ) )
+        {
+            $this->_registry = new Registry( array(), $this->_registryTemplate );
+        }
     }
 
     /**
      * @return string
      */
-    public function getConfigName()
+    public function getRegistryTemplate()
     {
-        return $this->_configName;
+        return $this->_registryTemplate;
     }
 
     /**
-     * @return string
-     */
-    public function getConfigPath()
-    {
-        return $this->_configPath;
-    }
-
-    /**
-     * @param string $configName
+     * @param string $registryTemplate
      *
      * @return BaseApplication
      */
-    public function setConfigName( $configName )
+    public function setRegistryTemplate( $registryTemplate )
     {
-        $this->_configName = $configName;
+        $this->_registryTemplate = $registryTemplate;
 
         return $this;
     }
 
     /**
-     * @param string $configPath
-     *
-     * @return BaseApplication
+     * @return RegistryLike
      */
-    public function setConfigPath( $configPath )
+    public function getRegistry()
     {
-        $this->_configPath = $configPath;
-
-        return $this;
+        return $this->_registry;
     }
 
     /**
-     * @return string
-     */
-    public function getShortName()
-    {
-        return $this->_shortName;
-    }
-
-    /**
-     * @param string $shortName
+     * @param RegistryLike $registry
      *
      * @return BaseApplication
      */
-    public function setShortName( $shortName )
+    public function setRegistry( RegistryLike $registry )
     {
-        $this->_shortName = $shortName;
+        $this->_registry = $registry;
 
         return $this;
     }

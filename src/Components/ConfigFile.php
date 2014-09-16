@@ -19,6 +19,7 @@
 namespace DreamFactory\Library\Console\Components;
 
 use Kisma\Core\Exceptions\FileSystemException;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 
 /**
  * Manages a bag full of ConfigNode objects
@@ -34,24 +35,21 @@ class ConfigFile extends ConfigNode
      */
     const DEFAULT_CONFIG_BASE = '.dreamfactory';
     /**
-     * @type string The name of the directory containing our configuration
+     * @type string The default suffix for our files
      */
-    const DEFAULT_CONFIG_SUFFIX = '.options.json';
-    /**
-     * @type string The format to use when creating date strings
-     */
-    const DEFAULT_TIMESTAMP_FORMAT = 'c';
+    const DEFAULT_CONFIG_SUFFIX = '.config.json';
 
     //******************************************************************************
     //* Members
     //******************************************************************************
 
     /**
-     * @type string The name/id of this config file
+     * @type string The prefix name of this config file (i.e. "fabric", or "sandman").
+     * Will be used to construct the actual file name: {$name}.config.json
      */
     protected $_name = null;
     /**
-     * @type string The absolute path to the actual configuration file
+     * @type string The absolute path where the config file lives
      */
     protected $_configPath = null;
     /**
@@ -68,12 +66,14 @@ class ConfigFile extends ConfigNode
      *
      * @param string $name The name/id of this configuration
      * @param string $path The path to the configuration file. Defaults to ~/.dreamfactory
+     * @param array  $parameters
      */
-    public function __construct( $name, $path = null )
+    public function __construct( $name, $path = null, array $parameters = array() )
     {
         $this->_name = $name;
         $this->_configPath = $path;
-        $this->_config = array();
+
+        $this->load();
     }
 
     //  Save junk if dirty...
@@ -96,25 +96,16 @@ class ConfigFile extends ConfigNode
      */
     public function load()
     {
-        $this->_configPath = $this->_locateConfig();
+        $_path = $this->_locateConfig();
 
-        if ( false === ( $_config = json_decode( file_get_contents( $this->_configPath ), true ) ) || JSON_ERROR_NONE != json_last_error() )
+        if ( false === ( $_config = json_decode( file_get_contents( $_path ), true ) ) || JSON_ERROR_NONE != json_last_error() )
         {
             $this->_configPath = null;
             throw new \RuntimeException( 'Invalid or missing JSON in file "' . $this->_configPath . '".' );
         }
 
-        $this->merge( $_config );
-    }
-
-    /**
-     * Merges data into an existing node
-     *
-     * @param array $dataToMerge
-     */
-    public function merge( array $dataToMerge = array() )
-    {
-        $this->set( $this->_nodeId, array_merge( $this->all(), $dataToMerge ) );
+        $this->_configPath = dirname( $_path );
+        $this->add( $_config );
     }
 
     /**
@@ -127,13 +118,7 @@ class ConfigFile extends ConfigNode
      */
     public function save( $comment = null )
     {
-        if ( !$this->_configPath )
-        {
-            $this->_configPath = $this->_locateConfig();
-        }
-
-        //  Work with local copy
-        $_timestamp = date( static::DEFAULT_TIMESTAMP_FORMAT, $_time = time() );
+        $_path = $this->_locateConfig();
 
         //  Add a comment to the configuration file
         if ( $comment )
@@ -142,28 +127,56 @@ class ConfigFile extends ConfigNode
         }
 
         //  Convert to JSON and store
-        $_json = json_encode( $this->all(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+        $_json = json_encode( $_config = $this->all(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
 
-        if ( false === file_put_contents( $this->_configPath, $_json ) )
+        if ( false === $_json || JSON_ERROR_NONE == json_last_error() )
         {
-            $this->_configPath = null;
-            throw new FileSystemException( 'Error saving configuration file: ' . $this->_configPath );
+            throw new \RuntimeException( 'Error encoding data to JSON: ' . json_last_error_msg() );
         }
 
-        return $this->all();
+        if ( false === file_put_contents( $_path, $_json ) )
+        {
+            $this->_configPath = null;
+            throw new FileSystemException( 'Error saving configuration file: ' . $_path );
+        }
+
+        $this->_configPath = dirname( $_path );
+
+        return $_config;
     }
 
     /**
-     * @param ConfigNode $node The node
+     * @param string $nodeId
+     * @param array  $defaultValue
      *
-     * @return $this
+     * @return mixed
      */
-    public function addNode( $node )
+    public function getNode( $nodeId, $defaultValue = null )
     {
-        $node->set( 'parentId', $this->_parentId );
-        $this->add( array($node->getNodeId() => $node->all()) );
+        if ( !$this->has( $nodeId ) )
+        {
+            $this->set( $nodeId, $defaultValue ?: $this->getDefaultNodeSchema() );
+        }
 
-        return $this;
+        return $this->get( $nodeId );
+    }
+
+    /**
+     * @param string $nodeId
+     * @param array  $parameters
+     */
+    public function addNode( $nodeId, array $parameters = array() )
+    {
+        if ( $this->has( $nodeId ) )
+        {
+            $this->set( $nodeId, $parameters );
+        }
+        else
+        {
+            $this->add( array($nodeId => $parameters) );
+        }
+
+        $this->addComment( 'Created node "' . $nodeId . '"' );
     }
 
     /**
@@ -175,10 +188,13 @@ class ConfigFile extends ConfigNode
      */
     public function removeNode( $nodeId )
     {
-        $_node = $this->get( $nodeId );
-        $this->remove( $nodeId );
+        if ( !$this->has( $nodeId ) )
+        {
+            throw new ParameterNotFoundException( $nodeId );
+        }
 
-        return $_node->all();
+        $this->remove( $nodeId );
+        $this->addComment( 'Removed node "' . $nodeId . '"' );
     }
 
     /**
@@ -203,13 +219,10 @@ class ConfigFile extends ConfigNode
         if ( !file_exists( $fileName ) )
         {
             if ( false ===
-                file_put_contents(
-                    $fileName,
-                    json_encode( $this->getDefaultSchema( true, $this->_nodeId ), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT )
-                )
+                file_put_contents( $fileName, json_encode( $this->getDefaultSchema( false ), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) )
             )
             {
-                throw new FileSystemException( 'Unable to create registry file: ' . $fileName );
+                throw new FileSystemException( 'Unable to create file: ' . $fileName );
             }
         }
 
@@ -222,15 +235,22 @@ class ConfigFile extends ConfigNode
      */
     protected function _locateConfig()
     {
-        if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
+        if ( is_dir( $this->_configPath ) )
         {
-            $_user = posix_getpwuid( posix_getuid() );
-            $_path =
-                ( isset( $_user, $_user['dir'] ) ? $_user['dir'] : getcwd() );
+            $_path = $this->_configPath;
         }
         else
         {
-            $_path = sys_get_temp_dir();
+            if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
+            {
+                $_user = posix_getpwuid( posix_getuid() );
+                $_path = ( isset( $_user, $_user['dir'] ) ? $_user['dir'] : getcwd() );
+            }
+            else
+            {
+                //  Default to CWD
+                $_path = getcwd();
+            }
         }
 
         //  This is where the file will live
