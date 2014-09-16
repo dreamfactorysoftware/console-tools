@@ -20,55 +20,60 @@ namespace DreamFactory\Library\Console\Components;
 
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
- * A simple registry
+ * A simple settings registry
  */
-class Registry implements ParameterBagInterface
+class SettingsNode extends ParameterBag
 {
-    //******************************************************************************
-    //* Constants
-    //******************************************************************************
-
-    /**
-     * @type string The name of the directory containing our configuration
-     */
-    const DEFAULT_CONFIG_BASE = '.dreamfactory';
-    /**
-     * @type string The name of the directory containing our configuration
-     */
-    const DEFAULT_CONFIG_SUFFIX = '.registry.json';
-    /**
-     * @type string The format to use when creating date strings
-     */
-    const DEFAULT_TIMESTAMP_FORMAT = 'c';
-
     //******************************************************************************
     //* Members
     //******************************************************************************
 
     /**
-     * @type \Symfony\Component\DependencyInjection\ParameterBag\ParameterBag
+     * @type string The ID of this node
      */
-    protected $_contents;
+    protected $_nodeId;
 
     //******************************************************************************
     //* Methods
     //******************************************************************************
 
     /**
-     * @param array $parameters
+     * Creates a new SettingsNodes
+     *
+     * @param string $nodeId
+     * @param array  $settings
+     *
+     * @return static
      */
-    public function __construct( array $parameters = array() )
+    public static function createNode( $nodeId, array $settings = array() )
     {
-        $this->_bag = new ParameterBag( $parameters );
+        //  Create a new bag and put our junk in it
+        /** @type SettingsNode $_node */
+        $_node = new static();
+        $_node->setNodeId( $nodeId )->add( array($nodeId => $settings) );
+
+        return $_node;
+    }
+
+    /**
+     * Sets the node ID of this node
+     *
+     * @param string $nodeId
+     *
+     * @return SettingsNode
+     */
+    public function setNodeId( $nodeId )
+    {
+        $this->_nodeId = $nodeId;
+
+        return $this;
     }
 
     /**
      * Locates an entry within a node
      *
-     * @param string $nodeId      The top-level key in the bag to check
      * @param string $entryId     The entry within the node
      * @param bool   $autoCreate  Inits the node and entry if the keys aren't found
      * @param bool   $returnValue If found, and this is true, the entry is returned, otherwise TRUE
@@ -79,7 +84,7 @@ class Registry implements ParameterBagInterface
     {
         try
         {
-            $_node = $this->_bag->get( $nodeId );
+            $_node = $this->get( $nodeId );
         }
         catch ( ParameterNotFoundException $_ex )
         {
@@ -89,20 +94,21 @@ class Registry implements ParameterBagInterface
             }
 
             //  Create a new node
-            $_node = array($nodeId => $this->_initializeNodeEntry());
-            $this->add( $_node );
+            $_node = array($entryId => $this->_initializeNodeEntry());
         }
 
         if ( !array_key_exists( $entryId, $_node ) )
         {
             if ( !$autoCreate )
             {
-                throw new \InvalidArgumentException( 'The entry "' . $entryId . '" does not exist in node "' . $nodeId . '".' );
+                throw new \InvalidArgumentException( 'The entry "' . $entryId . '" does not exist in node.' );
             }
 
-            $_node[$entryId] = $this->_initializeNodeEntry();
+            $_node->add( array($entryId => $this->_initializeNodeEntry()) );
             $this->add( $_node );
         }
+
+        $this->add( $_node );
 
         return $returnValue ? $_node[$entryId] : true;
     }

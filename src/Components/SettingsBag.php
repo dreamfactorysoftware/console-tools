@@ -20,12 +20,11 @@ namespace DreamFactory\Library\Console\Components;
 
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
- * A simple registry
+ * A simple settings registry
  */
-class Registry implements ParameterBagInterface
+class SettingsBag extends ParameterBag
 {
     //******************************************************************************
     //* Constants
@@ -45,25 +44,8 @@ class Registry implements ParameterBagInterface
     const DEFAULT_TIMESTAMP_FORMAT = 'c';
 
     //******************************************************************************
-    //* Members
-    //******************************************************************************
-
-    /**
-     * @type \Symfony\Component\DependencyInjection\ParameterBag\ParameterBag
-     */
-    protected $_contents;
-
-    //******************************************************************************
     //* Methods
     //******************************************************************************
-
-    /**
-     * @param array $parameters
-     */
-    public function __construct( array $parameters = array() )
-    {
-        $this->_bag = new ParameterBag( $parameters );
-    }
 
     /**
      * Locates an entry within a node
@@ -75,7 +57,7 @@ class Registry implements ParameterBagInterface
      *
      * @return bool|array
      */
-    public function hasEntry( $nodeId, $entryId, $autoCreate = false, $returnValue = false )
+    public function hasNode( $nodeId, $entryId, $autoCreate = false, $returnValue = false )
     {
         try
         {
