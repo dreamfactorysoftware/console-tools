@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 /**
  * A simple object to load and store application options
  */
-class Registry extends ParameterBag implements RegistryLike
+class Registry extends ParameterBag
 {
     //******************************************************************************
     //* Constants
@@ -48,53 +48,97 @@ class Registry extends ParameterBag implements RegistryLike
     //******************************************************************************
 
     /**
-     * Creates a new registry and loads from a JSON file
+     * Adds node entry with overwrite protection
      *
-     * @param string $filePath The absolute path to a JSON file
-     * @param bool   $save     If true, the file will be saved before returning
+     * @param string $nodeId
+     * @param string $entryId
+     * @param array  $properties
+     * @param bool   $overwrite
      *
-     * @throws \Exception
-     * @throws \Kisma\Core\Exceptions\FileSystemException
-     * @return RegistryLike
+     * @return Registry
      */
-    public static function createFromFile( $filePath, $save = false )
+    public function addNodeEntry( $nodeId, $entryId, $properties = array(), $overwrite = false )
     {
-        if ( empty( $templateFile ) || !file_exists( $templateFile ) || !is_readable( $templateFile ) )
+        $_nodes = $this->all();
+
+        if ( !array_key_exists( $nodeId, $_nodes ) )
         {
-            throw new \InvalidArgumentException( 'The template file "' . $templateFile . '" is invalid.' );
+            $this->add( $nodeId, array() );
+            $_nodes[$nodeId] = array();
         }
 
-        $_jsonFile = new JsonFile( $templateFile );
-
-        if ( $save )
+        if ( array_key_exists( $entryId, $_nodes[$nodeId] ) && !$overwrite )
         {
-            $_jsonFile->write( $_data = $_jsonFile->read() );
+            throw new \InvalidArgumentException( 'The entry id "' . $entryId . '" exists and $overwrite is not TRUE' );
         }
 
-        return new static( $_data );
+        return $this->setNodeEntry( $nodeId, $nodeId, $properties );
     }
 
     /**
-     * Reads and loads a registry template
+     * Sets a node entry
      *
-     * @param string|array $templateFile
+     * @param string $nodeId
+     * @param string $entryId
+     * @param array  $properties
+     *
+     * @return Registry
      */
-    protected function _initializeContents( $templateFile )
+    public function setNodeEntry( $nodeId, $entryId, $properties = array() )
     {
-        if ( is_array( $templateFile ) )
+        $_nodes = $this->all();
+
+        if ( !array_key_exists( $nodeId, $_nodes ) )
         {
-            $_template = $templateFile;
-        }
-        else
-        {
-            if ( false === ( $_template = json_decode( file_get_contents( $templateFile, 'r' ), true ) ) || JSON_ERROR_NONE != json_last_error() )
-            {
-                throw new \RuntimeException( 'The template file "' . $templateFile . '" is corrupt or does not contain valid JSON.' );
-            }
+            $_nodes[$nodeId] = array();
         }
 
-        $this->_registryTemplate = $templateFile;
+        $_nodes[$nodeId][$entryId] = $properties;
 
-        $this->add( $_template );
+        $this->clear();
+        $this->add( $_nodes );
+
+        return $this;
+    }
+
+    /**
+     * @param string $nodeId
+     * @param string $entryId
+     * @param mixed  $defaultValue
+     *
+     * @return mixed
+     */
+    public function getNodeEntry( $nodeId, $entryId, $defaultValue = array() )
+    {
+        $_nodes = $this->all();
+
+        return !array_key_exists( $nodeId, $_nodes ) ? $defaultValue : $_nodes[$entryId];
+    }
+
+    /**
+     * Creates a new registry and loads from a JSON file
+     *
+     * @param string $filePath The absolute path to a JSON file
+     *
+     * @throws \Kisma\Core\Exceptions\FileSystemException
+     * @return RegistryLike
+     */
+    public static function createFromFile( $filePath )
+    {
+        $_jsonFile = new JsonFile( $filePath );
+
+        return new static( $_jsonFile->read() );
+    }
+
+    /**
+     * @param string $fileName
+     *
+     * @throws \Exception
+     */
+    public function save( $fileName )
+    {
+        $_jsonFile = new JsonFile( $fileName );
+
+        $_jsonFile->write( $this->all() );
     }
 }
