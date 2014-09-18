@@ -19,7 +19,7 @@
 namespace DreamFactory\Library\Console\Commands;
 
 use DreamFactory\Library\Console\Enums\AnsiCodes;
-use DreamFactory\Library\Console\Interfaces\RegistryLike;
+use DreamFactory\Library\Console\Interfaces\ConfigFileLike;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -145,12 +145,12 @@ class BaseCommand extends ContainerAwareCommand
     }
 
     /**
-     * @return RegistryLike
+     * @return ConfigFileLike
      */
-    public function getRegistry()
+    public function getConfig()
     {
         /** @noinspection PhpUndefinedMethodInspection */
-        return $this->getApplication()->getRegistry();
+        return $this->getApplication()->getConfig();
     }
 
     /**

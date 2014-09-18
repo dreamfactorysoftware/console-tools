@@ -18,22 +18,28 @@
  */
 namespace DreamFactory\Library\Console\Components;
 
+use DreamFactory\Library\Console\Interfaces\NodeLike;
 use Kisma\Core\Exceptions\FileSystemException;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
- * Manages a bag full o' ConfigNodes
+ * Manages a bag full of ConfigNode objects
  */
-class ConfigFile extends ConfigNode
+class NodeBag extends ParameterBag implements NodeLike
 {
     //******************************************************************************
     //* Constants
     //******************************************************************************
 
     /**
-     * @type string The default suffix for our files
+     * @type string The default suffix for our file
      */
     const DEFAULT_CONFIG_SUFFIX = '.config.json';
+    /**
+     * @type string The default relative directory for our file
+     */
+    const DEFAULT_CONFIG_PATH = '.dreamfactory';
 
     //******************************************************************************
     //* Members
@@ -61,10 +67,13 @@ class ConfigFile extends ConfigNode
      *
      * @param string $name A short name that describes this config file. Typically the name of your application is used.
      * @param string $path The path to where this config file lives
+     * @param array  $values
      */
-    public function __construct( $name, $path )
+    public function __construct( $name, $path, array $values = array() )
     {
-        $this->_name = $name;
+        parent::__construct( $values );
+
+        $this->_name = str_replace( ' ', '-', strtolower( $name ) );
         $this->_path = $path;
 
         $this->load();
@@ -90,16 +99,21 @@ class ConfigFile extends ConfigNode
      */
     public function load()
     {
-        $_path = $this->_locateConfig();
-
-        if ( false === ( $_config = json_decode( file_get_contents( $_path ), true ) ) || JSON_ERROR_NONE != json_last_error() )
+        try
         {
-            $this->_path = null;
-            throw new \RuntimeException( 'Invalid or missing JSON in file "' . $this->_path . '".' );
+            $_path = $this->_locateConfig();
+            $_file = new JsonFile( $_path );
+            $_config = $_file->read();
+        }
+        catch ( FileSystemException $_ex )
+        {
+            throw new \RuntimeException( $_ex->getMessage() );
         }
 
         $this->_path = dirname( $_path );
+
         $this->add( $_config );
+        $this->_dirty = false;
     }
 
     /**
@@ -117,13 +131,12 @@ class ConfigFile extends ConfigNode
         //  Add a comment to the configuration file
         if ( $comment )
         {
+            $this->
             $this->addComment( $comment );
         }
 
         //  Convert to JSON and store
-        $_config = $this->all();
-
-        $_json = json_encode( $_config, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+        $_json = json_encode( $_config = $this->all(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
 
         if ( false === $_json || JSON_ERROR_NONE == json_last_error() )
         {
@@ -158,23 +171,8 @@ class ConfigFile extends ConfigNode
     }
 
     /**
-     * @param string $name
-     * @param mixed  $value
-     *
-     * @return $this|void
-     */
-    public function set( $name, $value )
-    {
-        parent::set( $name, $value );
-
-        return $this;
-    }
-
-    /**
      * @param string $nodeId
      * @param array  $parameters
-     *
-     * @return $this
      */
     public function addNode( $nodeId, array $parameters = array() )
     {
@@ -188,8 +186,6 @@ class ConfigFile extends ConfigNode
         }
 
         $this->addComment( 'Created node "' . $nodeId . '"' );
-
-        return $this;
     }
 
     /**
@@ -208,8 +204,6 @@ class ConfigFile extends ConfigNode
 
         $this->remove( $nodeId );
         $this->addComment( 'Removed node "' . $nodeId . '"' );
-
-        return $this;
     }
 
     /**
@@ -233,9 +227,9 @@ class ConfigFile extends ConfigNode
 
         if ( !file_exists( $fileName ) )
         {
-            if ( false ===
-                file_put_contents( $fileName, json_encode( $this->getDefaultSchema( false ), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) )
-            )
+            $_node = array();
+
+            if ( false === file_put_contents( $fileName, json_encode( $_node, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) ) )
             {
                 throw new FileSystemException( 'Unable to create file: ' . $fileName );
             }
@@ -250,25 +244,84 @@ class ConfigFile extends ConfigNode
      */
     protected function _locateConfig()
     {
-        if ( is_dir( $this->_path ) )
+        if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
         {
-            $_path = $this->_path;
+            $_user = posix_getpwuid( posix_getuid() );
+            $_basePath = ( isset( $_user, $_user['dir'] ) ? $_user['dir'] : getcwd() );
         }
         else
         {
-            if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
-            {
-                $_user = posix_getpwuid( posix_getuid() );
-                $_path = ( isset( $_user, $_user['dir'] ) ? $_user['dir'] : getcwd() );
-            }
-            else
-            {
-                //  Default to CWD
-                $_path = getcwd();
-            }
+            //  Default to CWD
+            $_basePath = getcwd();
         }
 
+        //  This is where the file will live
+        $_basePath .= DIRECTORY_SEPARATOR . static::DEFAULT_CONFIG_PATH;
+        $_fileName = $_basePath . DIRECTORY_SEPARATOR . $this->_name . static::DEFAULT_CONFIG_SUFFIX;
+
         //  Doesn't exist? Create it...
-        return $this->_ensureFileExists( $_path, $_path . DIRECTORY_SEPARATOR . $this->_name . static::DEFAULT_CONFIG_SUFFIX );
+        return $this->_ensureFileExists( $_basePath, $_fileName );
+    }
+
+    /**
+     * Returns an array that will become the contents of a new configuration node
+     *
+     * @return array|NodeLike
+     */
+    public function getDefaultSchema()
+    {
+        return array(static::META_DATA_KEY => array());
+    }
+
+    /**
+     * @return bool Always false as this is the top level node
+     */
+    public function getParentId()
+    {
+        return false;
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool True if the key exists in the node
+     */
+    public function contains( $key )
+    {
+        return $this->has( $key );
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->getId();
+    }
+
+    /**
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->_path;
+    }
+
+    /**
+     * @return string The id of this node
+     */
+    public function getId()
+    {
+        return $this->_name;
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool True if the key existed and was deleted
+     */
+    public function delete( $key )
+    {
+        return $this->delete( $key );
     }
 }

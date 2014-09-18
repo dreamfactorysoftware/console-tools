@@ -18,8 +18,8 @@
  */
 namespace DreamFactory\Library\Console;
 
-use DreamFactory\Library\Console\Components\Registry;
-use DreamFactory\Library\Console\Interfaces\RegistryLike;
+use DreamFactory\Library\Console\Components\ConfigFile;
+use DreamFactory\Library\Console\Interfaces\ConfigFileLike;
 use Symfony\Component\Console\Application;
 
 /**
@@ -44,13 +44,9 @@ class BaseApplication extends Application
     //******************************************************************************
 
     /**
-     * @type string A json file containing a template for creating a new registry
+     * @type ConfigFileLike
      */
-    protected $_registryTemplate;
-    /**
-     * @type RegistryLike
-     */
-    protected $_registry;
+    protected $_config;
 
     //******************************************************************************
     //* Methods
@@ -85,61 +81,27 @@ class BaseApplication extends Application
      * Configure the command
      *
      * @param array $config Configuration settings
+     *
+     * @return void
      */
     protected function _configure( array $config )
     {
-        foreach ( $config as $_key => $_value )
-        {
-            if ( method_exists( $this, 'set' . $_key ) )
-            {
-                call_user_func( array($this, 'set' . $_key), $_value );
-            }
-        }
+        $_name = $this->getName() ?: ( static::APP_NAME ?: ( isset( $argv, $argv[0] ) ? $argv[0] : basename( __CLASS__ ) ) );
 
-        if ( !empty( $this->_registryTemplate ) )
-        {
-            $this->_registry = new Registry( array(), $this->_registryTemplate );
-        }
+        $this->_config = new ConfigFile( $_name, null );
+
+        $_config = $this->_config->load();
+        $_apps = array_key_exists( 'app', $_config ) ? $_config['app'] : array();
+        $_apps[$this->getName()] = $config;
+        $this->_config->set( 'app', $_apps )->save();
     }
 
     /**
-     * @return string
+     * @return ConfigFileLike
      */
-    public function getRegistryTemplate()
+    public function getConfig()
     {
-        return $this->_registryTemplate;
-    }
-
-    /**
-     * @param string $registryTemplate
-     *
-     * @return BaseApplication
-     */
-    public function setRegistryTemplate( $registryTemplate )
-    {
-        $this->_registryTemplate = $registryTemplate;
-
-        return $this;
-    }
-
-    /**
-     * @return RegistryLike
-     */
-    public function getRegistry()
-    {
-        return $this->_registry;
-    }
-
-    /**
-     * @param RegistryLike $registry
-     *
-     * @return BaseApplication
-     */
-    public function setRegistry( RegistryLike $registry )
-    {
-        $this->_registry = $registry;
-
-        return $this;
+        return $this->_config;
     }
 
 }

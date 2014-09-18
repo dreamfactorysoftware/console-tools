@@ -128,8 +128,8 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
     public function getDefaultMetaData()
     {
         $_metaData = array(
-            'nodeId'     => $this->_nodeId,
-            'parentId'   => $this->_parentId,
+            'node_id'    => $this->_nodeId,
+            'parent_id'  => $this->_parentId,
             'comments'   => $this->createEntryComment( 'Creation', false ),
             'updated_at' => CommandHelper::getCurrentTimestamp(),
         );
@@ -247,9 +247,28 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
     /**
      * @return string The id of this node
      */
-    public function getNodeId()
+    public function getId()
     {
-        return $this->_nodeId;
+        return $this->_id;
     }
 
+    /**
+     * @param string $key
+     *
+     * @return bool True if the key exists in the node
+     */
+    public function contains( $key )
+    {
+        return $this->has( $key );
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool True if the key existed and was deleted
+     */
+    public function delete( $key )
+    {
+        $this->remove( $key );
+    }
 }
