@@ -91,8 +91,15 @@ class BaseApplication extends Application
         $this->_config = new ConfigFile( $_name, null );
 
         $_config = $this->_config->load();
-        $_apps = array_key_exists( 'app', $_config ) ? $_config['app'] : array();
+        $_apps = array();
+
+        if ( is_array( $_config ) && array_key_exists( 'app', $_config ) )
+        {
+            $_apps = $_config['app'];
+        }
+
         $_apps[$this->getName()] = $config;
+
         $this->_config->set( 'app', $_apps )->save();
     }
 

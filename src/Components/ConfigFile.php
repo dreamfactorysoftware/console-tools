@@ -123,9 +123,14 @@ class ConfigFile extends ConfigNode
         //  Convert to JSON and store
         $_config = $this->all();
 
+        if ( empty( $_config ) )
+        {
+            $_config = array();
+        }
+
         $_json = json_encode( $_config, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
 
-        if ( false === $_json || JSON_ERROR_NONE == json_last_error() )
+        if ( false === $_json || JSON_ERROR_NONE != json_last_error() )
         {
             throw new \RuntimeException( 'Error encoding data to JSON: ' . json_last_error_msg() );
         }
@@ -149,25 +154,12 @@ class ConfigFile extends ConfigNode
      */
     public function getNode( $nodeId, $defaultValue = null )
     {
-        if ( !$this->has( $nodeId ) )
+        if ( !$this->contains( $nodeId ) )
         {
             $this->set( $nodeId, $defaultValue ?: $this->getDefaultNodeSchema() );
         }
 
         return $this->get( $nodeId );
-    }
-
-    /**
-     * @param string $name
-     * @param mixed  $value
-     *
-     * @return $this|void
-     */
-    public function set( $name, $value )
-    {
-        parent::set( $name, $value );
-
-        return $this;
     }
 
     /**
@@ -178,7 +170,7 @@ class ConfigFile extends ConfigNode
      */
     public function addNode( $nodeId, array $parameters = array() )
     {
-        if ( $this->has( $nodeId ) )
+        if ( $this->contains( $nodeId ) )
         {
             $this->set( $nodeId, $parameters );
         }
@@ -201,12 +193,12 @@ class ConfigFile extends ConfigNode
      */
     public function removeNode( $nodeId )
     {
-        if ( !$this->has( $nodeId ) )
+        if ( !$this->contains( $nodeId ) )
         {
             throw new ParameterNotFoundException( $nodeId );
         }
 
-        $this->remove( $nodeId );
+        $this->delete( $nodeId );
         $this->addComment( 'Removed node "' . $nodeId . '"' );
 
         return $this;

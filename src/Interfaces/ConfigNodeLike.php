@@ -18,7 +18,7 @@
  */
 namespace DreamFactory\Library\Console\Interfaces;
 
-interface ConfigNodeLike extends NodeLike
+interface ConfigNodeLike
 {
     //******************************************************************************
     //* Methods

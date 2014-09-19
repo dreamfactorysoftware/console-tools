@@ -66,8 +66,9 @@ interface NodeLike extends BagLike
     /**
      * @param string $key
      * @param mixed  $value
+     * @param bool   $overwrite
      *
-     * @return NodeLike
+     * @return NodeLike|ConfigFileLike
      */
     public function set( $key, $value, $overwrite = true );
 

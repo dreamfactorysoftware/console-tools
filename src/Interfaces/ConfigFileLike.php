@@ -33,5 +33,17 @@ interface ConfigFileLike
      * @return ConfigFileLike
      */
     public static function createFromFile( $templateFile );
+
+    /**
+     * @return array
+     */
+    public function load();
+
+    /**
+     * @param string $comment
+     *
+     * @return array
+     */
+    public function save( $comment = null );
 }
  

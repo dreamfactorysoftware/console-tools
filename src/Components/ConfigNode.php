@@ -21,129 +21,15 @@ namespace DreamFactory\Library\Console\Components;
 use DreamFactory\Library\Console\Interfaces\ConfigNodeLike;
 use DreamFactory\Tools\Fabric\Utility\CommandHelper;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
  * A configuration/settings container
  */
-class ConfigNode extends ParameterBag implements ConfigNodeLike
+class ConfigNode extends DataNode implements ConfigNodeLike
 {
-    //******************************************************************************
-    //* Constants
-    //******************************************************************************
-
-    /**
-     * @type string Our meta node
-     */
-    const META_DATA_KEY = '_meta';
-
-    //******************************************************************************
-    //* Members
-    //******************************************************************************
-
-    /**
-     * @type string My node ID
-     */
-    protected $_nodeId;
-    /**
-     * @type string My parent node id, if any
-     */
-    protected $_parentId = null;
-
     //******************************************************************************
     //* Methods
     //******************************************************************************
-
-    /**
-     * @param string $parentId The ID/name of my parent node
-     * @param string $nodeId   The ID/name of this node
-     * @param array  $parameters
-     */
-    public function __construct( $parentId, $nodeId, array $parameters = array() )
-    {
-        $this->_nodeId = $nodeId;
-        $this->_parentId = $parentId;
-
-        parent::__construct( $parameters );
-    }
-
-    /**
-     * Returns all entries in a JSON string
-     *
-     * @return string
-     */
-    public function allJson()
-    {
-        return json_encode( $this->all(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
-    }
-
-    /**
-     * Adds comment to the metadata for this node
-     *
-     * @param string $comment
-     *
-     * @return $this
-     */
-    public function addComment( $comment )
-    {
-        $_node = $this->getMetaData();
-        $_node['comments'] = array_merge( $_node['comments'], $this->createEntryComment( $comment, false ) );
-        $this->setMetaData( $_node );
-
-        return $this;
-    }
-
-    /**
-     * Gets the hive's metadata
-     *
-     * @return ConfigNodeLike|array
-     */
-    public function getMetaData()
-    {
-        if ( !$this->has( static::META_DATA_KEY ) )
-        {
-            $this->set( static::META_DATA_KEY, $this->getDefaultMetaData() );
-        }
-
-        return $this->get( static::META_DATA_KEY );
-    }
-
-    /**
-     * Sets the hive's metadata
-     *
-     * @param array|ConfigNodeLike $metaData
-     *
-     * @return $this
-     */
-    public function setMetaData( array $metaData = array() )
-    {
-        $this->set( static::META_DATA_KEY, $metaData );
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getDefaultMetaData()
-    {
-        $_metaData = array(
-            'node_id'    => $this->_nodeId,
-            'parent_id'  => $this->_parentId,
-            'comments'   => $this->createEntryComment( 'Creation', false ),
-            'updated_at' => CommandHelper::getCurrentTimestamp(),
-        );
-
-        return new static( $this->_nodeId, static::META_DATA_KEY, $_metaData );
-    }
-
-    /**
-     * @return array|ConfigNodeLike
-     */
-    public function getDefaultSchema()
-    {
-        return $this->getDefaultMetaData();
-    }
 
     /**
      * @return array
@@ -157,14 +43,14 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
      * Locates an entry within a node
      *
      * @param string $entryId     The entry within the node
-     * @param bool   $autoCreate  Inits the node and entry if the keys aren't found
+     * @param bool   $autoCreate  Initializes the node and entry if the keys aren't found
      * @param bool   $returnValue If found, and this is true, the entry is returned, otherwise TRUE
      *
      * @return bool|array
      */
     public function hasEntry( $entryId, $autoCreate = false, $returnValue = false )
     {
-        if ( !$this->has( $entryId ) )
+        if ( !$this->contains( $entryId ) )
         {
             if ( !$autoCreate )
             {
@@ -234,41 +120,5 @@ class ConfigNode extends ParameterBag implements ConfigNodeLike
     public function createEntryComment( $comment )
     {
         return array(CommandHelper::getCurrentTimestamp() => $comment);
-    }
-
-    /**
-     * @return string
-     */
-    public function getParentId()
-    {
-        return $this->_parentId;
-    }
-
-    /**
-     * @return string The id of this node
-     */
-    public function getId()
-    {
-        return $this->_id;
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return bool True if the key exists in the node
-     */
-    public function contains( $key )
-    {
-        return $this->has( $key );
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return bool True if the key existed and was deleted
-     */
-    public function delete( $key )
-    {
-        $this->remove( $key );
     }
 }

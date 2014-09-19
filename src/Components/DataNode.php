@@ -18,8 +18,9 @@
  */
 namespace DreamFactory\Library\Console\Components;
 
+use DreamFactory\Library\Console\Interfaces\ConfigFileLike;
 use DreamFactory\Library\Console\Interfaces\NodeLike;
-use DreamFactory\Tools\Fabric\Utility\CommandHelper;
+use DreamFactory\Library\Console\Utility\CommandHelper;
 
 /**
  * A fancy array
@@ -230,7 +231,7 @@ class DataNode implements NodeLike
      * @param mixed  $value
      * @param bool   $overwrite
      *
-     * @return NodeLike
+     * @return NodeLike|ConfigFileLike
      */
     public function set( $key, $value, $overwrite = true )
     {
@@ -264,7 +265,7 @@ class DataNode implements NodeLike
                 return json_encode( $this->_contents, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
         }
 
-        return $this->_contents;
+        return empty( $this->_contents ) ? array() : $this->_contents;
     }
 
     /**
