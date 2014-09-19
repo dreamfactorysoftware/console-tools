@@ -20,12 +20,11 @@ namespace DreamFactory\Library\Console\Components;
 
 use DreamFactory\Library\Console\Interfaces\ConfigFileLike;
 use DreamFactory\Library\Console\Interfaces\NodeLike;
-use DreamFactory\Library\Console\Utility\CommandHelper;
 
 /**
  * A fancy array
  */
-class DataNode implements NodeLike
+class DataNode implements NodeLike, \IteratorAggregate, \Countable
 {
     //******************************************************************************
     //* Members
@@ -36,10 +35,6 @@ class DataNode implements NodeLike
      */
     protected $_id;
     /**
-     * @type string My parent node id, if any
-     */
-    protected $_parentId = null;
-    /**
      * @type array My values
      */
     protected $_contents;
@@ -49,18 +44,13 @@ class DataNode implements NodeLike
     //******************************************************************************
 
     /**
-     * @param string $id       The ID/name of this node
-     * @param array  $values   An array of values to fill the node
-     * @param string $parentId The ID/name of my parent node, if any
+     * @param string $id     The ID/name of this node
+     * @param array  $values An array of values to fill the node
      */
-    public function __construct( $id, array $values = array(), $parentId = null )
+    public function __construct( $id, array $values = array() )
     {
         $this->_id = $id;
-        $this->_parentId = $parentId;
-        $this->_contents = $values;
-
-        //  This initializes the metadata
-        $this->getMetaData();
+        $this->_contents = empty( $values ) ? $this->initializeNode() : $values;
     }
 
     /**
@@ -79,96 +69,21 @@ class DataNode implements NodeLike
     }
 
     /**
-     * Adds comment to the metadata for this node
-     *
-     * @param string $comment
-     *
-     * @return $this
+     * @param string   $id
+     * @param NodeLike $node
      */
-    public function addComment( $comment )
+    public function addNode( $id, NodeLike &$node )
     {
-        $_node = $this->getMetaData();
-        $_node['comments'] = array_merge( $_node['comments'], $this->createComment( $comment ) );
-        $this->setMetaData( $_node );
-
-        return $this;
+        $this->add( array($id => $node->all()) );
     }
 
     /**
-     * Gets the hive's metadata
-     *
-     * @return NodeLike|array
+     * @param string   $id
+     * @param NodeLike $node
      */
-    public function getMetaData()
+    public function setNode( $id, NodeLike $node )
     {
-        if ( !$this->contains( static::META_DATA_KEY ) )
-        {
-            $this->setMetaData( $this->getDefaultMetaData() );
-        }
-
-        return $this->getMetaData();
-    }
-
-    /**
-     * Sets the hive's metadata
-     *
-     * @param array|NodeLike $metaData
-     *
-     * @return $this
-     */
-    public function setMetaData( array $metaData = array() )
-    {
-        $this->set( static::META_DATA_KEY, $metaData );
-
-        return $this;
-    }
-
-    /**
-     * @param bool $createComment If true, a "created" comment is added to the schema
-     *
-     * @return array
-     */
-    public function getDefaultMetaData( $createComment = true )
-    {
-        $_metadata = array(
-            'id'         => $this->_id,
-            'parent_id'  => $this->_parentId,
-            'comments'   => array(),
-            'updated_at' => CommandHelper::getCurrentTimestamp(),
-        );
-
-        if ( $createComment )
-        {
-            $_metadata['comments'][] = $this->createComment( 'Creation' );
-        }
-
-        return $_metadata;
-    }
-
-    /**
-     * @return array|NodeLike
-     */
-    public function getDefaultSchema()
-    {
-        return array(static::META_DATA_KEY => $this->getDefaultMetaData());
-    }
-
-    /**
-     * @param string $comment
-     *
-     * @return array
-     */
-    public function createComment( $comment )
-    {
-        return array(CommandHelper::getCurrentTimestamp() => $comment);
-    }
-
-    /**
-     * @return string
-     */
-    public function getParentId()
-    {
-        return $this->_parentId;
+        $this->set( $id, $node->all() );
     }
 
     /**
@@ -182,28 +97,13 @@ class DataNode implements NodeLike
     /**
      * @param string $key
      *
-     * @return bool True if the key exists in the node
+     * @return bool|string The normalized key if found, or false
      */
-    public function contains( $key )
+    public function has( $key )
     {
-        return array_key_exists( $this->normalizeKey( $key ), $this->_contents );
-    }
+        $_key = $this->normalizeKey( $key );
 
-    /**
-     * @param string $key
-     *
-     * @return bool True if the key existed and was deleted
-     */
-    public function delete( $key )
-    {
-        if ( $this->contains( $key ) )
-        {
-            unset( $this->_contents[$this->normalizeKey( $key )] );
-
-            return true;
-        }
-
-        return false;
+        return array_key_exists( $_key, $this->_contents ) ? $_key : false;
     }
 
     /**
@@ -216,9 +116,7 @@ class DataNode implements NodeLike
             return $this->all();
         }
 
-        $_key = $this->normalizeKey( $key );
-
-        if ( $this->contains( $_key ) )
+        if ( false !== ( $_key = $this->has( $key ) ) )
         {
             return $this->_contents[$_key];
         }
@@ -240,12 +138,12 @@ class DataNode implements NodeLike
             $value = $value->all();
         }
 
-        if ( !$overwrite && $this->contains( $key ) )
+        if ( !$overwrite && false !== ( $_key = $this->has( $key ) ) )
         {
             throw new \LogicException( 'The key "' . $key . '" exists and overwrite is disabled.' );
         }
 
-        $this->_contents[$this->normalizeKey( $key )] = $value;
+        $this->_contents[$_key] = $value;
 
         return $this;
     }
@@ -269,6 +167,22 @@ class DataNode implements NodeLike
     }
 
     /**
+     * @return NodeLike
+     */
+    public function initializeNode()
+    {
+        $this->_contents = $this->getDefaultSchema();
+    }
+
+    /**
+     * @return array|NodeLike
+     */
+    public function getDefaultSchema()
+    {
+        return array();
+    }
+
+    /**
      * Normalizes a key for comparisons
      *
      * @param string $key
@@ -278,5 +192,38 @@ class DataNode implements NodeLike
     public function normalizeKey( $key )
     {
         return strtolower( $key );
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool True if the key existed and was deleted
+     */
+    public function remove( $key )
+    {
+        if ( false !== ( $_key = $this->has( $key ) ) )
+        {
+            unset( $this->_contents[$_key] );
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator( $this->_contents );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function count()
+    {
+        return count( $this->_contents );
     }
 }

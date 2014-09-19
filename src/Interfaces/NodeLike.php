@@ -18,29 +18,20 @@
  */
 namespace DreamFactory\Library\Console\Interfaces;
 
-use Kisma\Core\Interfaces\BagLike;
-
-interface NodeLike extends BagLike
+interface NodeLike
 {
     //******************************************************************************
     //* Constants
     //******************************************************************************
 
     /**
-     * @type string Our metadata key
+     * @type string Our key
      */
     const META_DATA_KEY = '_metadata';
 
     //******************************************************************************
     //* Methods
     //******************************************************************************
-
-    /**
-     * Returns the parent node id of this node, if any.
-     *
-     * @return string the id of my parent node
-     */
-    public function getParentId();
 
     /**
      * @return string The id of this node
@@ -52,13 +43,18 @@ interface NodeLike extends BagLike
      *
      * @return bool True if the key exists in the node
      */
-    public function contains( $key );
+    public function has( $key );
 
     /**
-     * @param string $key              The key to get. If null, all values are returned
-     * @param mixed  $defaultValue
-     * @param bool   $burnAfterReading If true, key is removed from bag after reading
+     * Retrieves a value at the given key location, or the default value if key isn't found.
+     * Setting $burnAfterReading to true will remove the key-value pair from the bag after it
+     * is retrieved. Call with no arguments to get back a KVP array of contents
      *
+     * @param string $key
+     * @param mixed  $defaultValue
+     * @param bool   $burnAfterReading
+     *
+     * @throws \Kisma\Core\Exceptions\BagException
      * @return mixed
      */
     public function get( $key = null, $defaultValue = null, $burnAfterReading = false );
@@ -68,7 +64,8 @@ interface NodeLike extends BagLike
      * @param mixed  $value
      * @param bool   $overwrite
      *
-     * @return NodeLike|ConfigFileLike
+     * @throws \Kisma\Core\Exceptions\BagException
+     * @return NodeLike
      */
     public function set( $key, $value, $overwrite = true );
 
@@ -77,7 +74,7 @@ interface NodeLike extends BagLike
      *
      * @return bool True if the key existed and was deleted
      */
-    public function delete( $key );
+    public function remove( $key );
 
     /**
      * Returns an array of all node entries

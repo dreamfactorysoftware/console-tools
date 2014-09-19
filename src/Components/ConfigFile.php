@@ -18,13 +18,14 @@
  */
 namespace DreamFactory\Library\Console\Components;
 
+use DreamFactory\Library\Console\Interfaces\NodeLike;
 use Kisma\Core\Exceptions\FileSystemException;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 
 /**
  * Manages a bag full o' ConfigNodes
  */
-class ConfigFile extends ConfigNode
+class ConfigFile
 {
     //******************************************************************************
     //* Constants
@@ -51,6 +52,10 @@ class ConfigFile extends ConfigNode
      * @type bool If true, the config needs saving
      */
     protected $_dirty = false;
+    /**
+     * @type NodeLike[]
+     */
+    protected $_nodes = array();
 
     //******************************************************************************
     //* Methods
@@ -225,8 +230,7 @@ class ConfigFile extends ConfigNode
 
         if ( !file_exists( $fileName ) )
         {
-            if ( false ===
-                file_put_contents( $fileName, json_encode( $this->getDefaultSchema( false ), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) )
+            if ( false === file_put_contents( $fileName, json_encode( $this->getDefaultSchema( false ), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) )
             )
             {
                 throw new FileSystemException( 'Unable to create file: ' . $fileName );

@@ -79,12 +79,12 @@ class NodeBag extends ParameterBag implements NodeLike
         $this->load();
     }
 
-    //  Save junk if dirty...
     /**
      * @throws FileSystemException
      */
     public function __destruct()
     {
+        //  Save junk if dirty...
         if ( $this->_dirty )
         {
             $this->save();
@@ -131,8 +131,7 @@ class NodeBag extends ParameterBag implements NodeLike
         //  Add a comment to the configuration file
         if ( $comment )
         {
-            $this->
-            $this->addComment( $comment );
+            $this->$this->addComment( $comment );
         }
 
         //  Convert to JSON and store
