@@ -18,8 +18,9 @@
  */
 namespace DreamFactory\Library\Console;
 
-use DreamFactory\Library\Console\Components\ConfigFile;
-use DreamFactory\Library\Console\Interfaces\ConfigFileLike;
+use DreamFactory\Library\Console\Components\Registry;
+use DreamFactory\Library\Console\Components\SettingsNode;
+use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use Symfony\Component\Console\Application;
 
 /**
@@ -44,9 +45,9 @@ class BaseApplication extends Application
     //******************************************************************************
 
     /**
-     * @type ConfigFileLike
+     * @type RegistryLike
      */
-    protected $_config;
+    protected $_registry;
 
     //******************************************************************************
     //* Methods
@@ -88,27 +89,22 @@ class BaseApplication extends Application
     {
         $_name = $this->getName() ?: ( static::APP_NAME ?: ( isset( $argv, $argv[0] ) ? $argv[0] : basename( __CLASS__ ) ) );
 
-        $this->_config = new ConfigFile( $_name, null );
+        $_registry = new Registry( $_name, dirname( __DIR__ ) . DIRECTORY_SEPARATOR . 'config' );
 
-        $_config = $this->_config->load();
-        $_apps = array();
-
-        if ( is_array( $_config ) && array_key_exists( 'app', $_config ) )
+        if ( false === ( $_key = $_registry->has( $_name ) ) )
         {
-            $_apps = $_config['app'];
+            $_node = new SettingsNode( $_name, $config );
+            $_registry->addNode( $_name, $_node );
         }
 
-        $_apps[$this->getName()] = $config;
-
-        $this->_config->set( 'app', $_apps )->save();
+        $this->_registry = $_registry->save();
     }
 
     /**
-     * @return ConfigFileLike
+     * @return RegistryLike
      */
-    public function getConfig()
+    public function getRegistry()
     {
-        return $this->_config;
+        return $this->_registry;
     }
-
 }

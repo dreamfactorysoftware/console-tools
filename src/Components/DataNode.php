@@ -138,7 +138,7 @@ class DataNode implements NodeLike, \IteratorAggregate, \Countable
             $value = $value->all();
         }
 
-        if ( !$overwrite && false !== ( $_key = $this->has( $key ) ) )
+        if ( false !== ( $_key = $this->has( $key ) ) && !$overwrite )
         {
             throw new \LogicException( 'The key "' . $key . '" exists and overwrite is disabled.' );
         }
