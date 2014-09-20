@@ -19,25 +19,17 @@
 namespace DreamFactory\Library\Console\Components;
 
 use DreamFactory\Library\Console\Interfaces\ConfigNodeLike;
-use DreamFactory\Tools\Fabric\Utility\CommandHelper;
+use DreamFactory\Library\Console\Interfaces\NodeLike;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 
 /**
  * A configuration/settings container
  */
-class ConfigNode extends DataNode implements ConfigNodeLike
+class ConfigNode extends NodeBag
 {
     //******************************************************************************
     //* Methods
     //******************************************************************************
-
-    /**
-     * @return array
-     */
-    public function getDefaultNodeSchema()
-    {
-        return array();
-    }
 
     /**
      * Locates an entry within a node
@@ -50,6 +42,7 @@ class ConfigNode extends DataNode implements ConfigNodeLike
      */
     public function hasEntry( $entryId, $autoCreate = false, $returnValue = false )
     {
+        $this->
         if ( !$this->contains( $entryId ) )
         {
             if ( !$autoCreate )
@@ -120,5 +113,27 @@ class ConfigNode extends DataNode implements ConfigNodeLike
     public function createEntryComment( $comment )
     {
         return array(CommandHelper::getCurrentTimestamp() => $comment);
+    }
+
+    /**
+     * Returns an array that will become the contents of a new configuration node
+     *
+     * @return array|ConfigNodeLike
+     */
+    public function getDefaultSchema()
+    {
+        // TODO: Implement getDefaultSchema() method.
+    }
+
+    /**
+     * Initializes the contents of the bag
+     *
+     * @param array $contents
+     *
+     * @return NodeLike
+     */
+    public function initialize( array $contents = array() )
+    {
+        // TODO: Implement initialize() method.
     }
 }

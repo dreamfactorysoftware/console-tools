@@ -34,16 +34,28 @@ interface NodeLike
     //******************************************************************************
 
     /**
-     * @return string The id of this node
+     * Initializes the contents of the bag
+     *
+     * @param mixed $contents
+     *
+     * @return NodeLike
      */
-    public function getId();
+    public function initialize( $contents = null );
+
+    /**
+     * Removes all bag items
+     *
+     * @return NodeLike
+     */
+    public function clear();
 
     /**
      * @param string $key
+     * @param bool   $returnNormalizedKey If true and the key was found, the normalized key is returned. False otherwise
      *
-     * @return bool True if the key exists in the node
+     * @return bool|string The normalized key if found, or false
      */
-    public function has( $key );
+    public function has( $key, $returnNormalizedKey = true );
 
     /**
      * Retrieves a value at the given key location, or the default value if key isn't found.

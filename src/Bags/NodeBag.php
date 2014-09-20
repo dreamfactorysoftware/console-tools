@@ -16,14 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace DreamFactory\Library\Console\Components;
+namespace DreamFactory\Library\Console\Bags;
 
-use DreamFactory\Library\Console\Bags\BagOfHolding;
+use DreamFactory\Library\Console\Components\DataNode;
 
 /**
- * A fancy array
+ * A bag that holds nodes
  */
-class DataNode extends BagOfHolding
+class NodeBag extends BagOfHolding
 {
     //******************************************************************************
     //* Constants
@@ -39,26 +39,59 @@ class DataNode extends BagOfHolding
     //******************************************************************************
 
     /**
-     * @param string $id
-     * @param array  $contents
-     */
-    public function __construct( $id = null, array $contents = array() )
-    {
-        $_id = static::NODE_ID ?: $id;
-
-        //  Override the ID with the current class's NODE_ID
-        parent::__construct( $_id, $contents );
-    }
-
-    /**
-     * Returns an array containing an empty schema for this node
-     *
-     * @param bool $addComment If true, a created comment will be added
+     * A default schema for the node
      *
      * @return array
      */
-    public function getSchema( $addComment = true )
+    public function getSchema()
     {
         return array();
     }
+
+    /**
+     * @param DataNode[] $nodes
+     *
+     * @return \DreamFactory\Library\Console\Components\NodeBag
+     */
+    public function add( array $nodes = array() )
+    {
+        foreach ( $nodes as $_node )
+        {
+            $this->set( $_node->getId(), $_node );
+        }
+    }
+
+    public function replace( DataNode $node )
+    {
+        $this->set( $node->getId(), $node );
+
+        return $this;
+    }
+
+    /**
+     * @param array|DataNode $contents
+     *
+     * @return $this|BagOfHolding
+     */
+    public function initialize( $contents = null )
+    {
+        if ( $contents instanceof DataNode )
+        {
+            return $this->set( $contents->getId(), $contents );
+        }
+
+        if ( is_array( $contents ) )
+        {
+            foreach ( $contents as $_key => $_value )
+            {
+                $this->set( $_key, $_value );
+            }
+
+            return $this;
+        }
+
+        //  I have no idea what you've sent in here...
+        return $this->clear();
+    }
+
 }

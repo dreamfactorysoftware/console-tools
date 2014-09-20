@@ -27,16 +27,17 @@ use DreamFactory\Library\Console\Utility\CommandHelper;
 class MetaDataNode extends DataNode
 {
     //******************************************************************************
-    //* Methods
+    //* Constants
     //******************************************************************************
 
     /**
-     * @param array $values An array of values to fill the node
+     * @type string My node ID
      */
-    public function __construct( array $values = array() )
-    {
-        parent::__construct( static::META_DATA_KEY, $values );
-    }
+    const NODE_ID = self::META_DATA_KEY;
+
+    //******************************************************************************
+    //* Methods
+    //******************************************************************************
 
     /**
      * Adds comment to the metadata for this node
@@ -71,10 +72,9 @@ class MetaDataNode extends DataNode
      *
      * @return array|NodeLike
      */
-    public function getDefaultSchema( $addComment = true )
+    public function getSchema( $addComment = true )
     {
         $_metadata = array(
-            'id'         => $this->_id,
             'comments'   => array(),
             'updated_at' => CommandHelper::getCurrentTimestamp(),
         );
@@ -84,6 +84,6 @@ class MetaDataNode extends DataNode
             $_metadata['comments'][] = $this->formatComment( 'Creation' );
         }
 
-        return array($this->_id => $_metadata);
+        return $_metadata;
     }
 }

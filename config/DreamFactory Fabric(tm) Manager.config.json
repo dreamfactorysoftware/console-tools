@@ -1,8 +1,0 @@
-{
-    "": {
-        "registryTemplate": "/opt/dreamfactory/fabric/cli/config/default.registry.schema.json"
-    },
-    "0": {
-        "registryTemplate": "/opt/dreamfactory/fabric/cli/config/default.registry.schema.json"
-    }
-}

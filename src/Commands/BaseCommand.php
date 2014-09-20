@@ -18,6 +18,7 @@
  */
 namespace DreamFactory\Library\Console\Commands;
 
+use DreamFactory\Library\Console\BaseApplication;
 use DreamFactory\Library\Console\Enums\AnsiCodes;
 use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -147,10 +148,17 @@ class BaseCommand extends ContainerAwareCommand
     /**
      * @return RegistryLike
      */
-    public function getConfig()
+    public function getRegistry()
     {
-        /** @noinspection PhpUndefinedMethodInspection */
-        return $this->getApplication()->getConfig();
+        /** @type BaseApplication $_app */
+        $_app = $this->getApplication();
+
+        if ( empty( $_app ) )
+        {
+            throw new \RuntimeException( 'The $application property has not been set for this command.' );
+        }
+
+        return $_app->getRegistry();
     }
 
     /**

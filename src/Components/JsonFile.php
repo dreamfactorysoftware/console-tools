@@ -62,16 +62,14 @@ class JsonFile
     /**
      * Construct
      *
-     * @param string The absolute path to a json file
+     * @param string       $filePath        The absolute path of the file, including the name.
+     * @param array|object $defaultContents The contents to write to the file if being created
+     *
+     * @throws FileSystemException
      */
-    public function __construct( $filePath = null )
+    public function __construct( $filePath = null, $defaultContents = null )
     {
-        if ( !file_exists( $filePath ) || !is_readable( $filePath ) )
-        {
-            throw new \InvalidArgumentException( 'The file "' . $filePath . '" is invalid or cannot be read.' );
-        }
-
-        $this->_filePath = $filePath;
+        $this->_filePath = static::ensureFileExists( dirname( $filePath ), basename( $filePath ), $defaultContents );
     }
 
     /**
@@ -133,7 +131,7 @@ class JsonFile
      * @throws FileSystemException
      * @throws \Exception
      */
-    public function write( $data = array(), $jsonOptions = 448, $retries = 3, $retryDelay = 500000 )
+    public function write( $data = array(), $jsonOptions = self::DEFAULT_JSON_ENCODE_OPTIONS, $retries = 3, $retryDelay = 500000 )
     {
         //  Try once at least!
         if ( empty( $retries ) )
@@ -211,6 +209,36 @@ class JsonFile
     public function getFilePath()
     {
         return $this->_filePath;
+    }
+
+    /**
+     * Makes sure the file passed it exists. Create default config and saves otherwise.
+     *
+     * @param string       $filePath        The absolute path of the file, including the name.
+     * @param array|object $defaultContents The contents to write to the file if being created
+     *
+     * @throws FileSystemException
+     * @return string The absolute path to the file
+     */
+    public function ensureFileExists( $filePath, $defaultContents = null )
+    {
+        $_path = dirname( $filePath );
+
+        if ( !is_dir( $_path ) || false === @mkdir( $_path, 0777, true ) )
+        {
+            throw new FileSystemException( 'Unable to create directory: ' . $_path );
+        }
+
+        if ( !file_exists( $filePath ) )
+        {
+            if ( false === file_put_contents( $filePath, empty( $defaultContents ) ? '{}' : static::encode( $defaultContents ) ) )
+            {
+                throw new FileSystemException( 'Unable to create file: ' . $filePath );
+            }
+        }
+
+        //  Exists
+        return $filePath;
     }
 
 }

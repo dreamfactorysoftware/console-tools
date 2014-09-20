@@ -18,8 +18,8 @@
  */
 namespace DreamFactory\Library\Console;
 
+use DreamFactory\Library\Console\Components\DataNode;
 use DreamFactory\Library\Console\Components\Registry;
-use DreamFactory\Library\Console\Components\SettingsNode;
 use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use Symfony\Component\Console\Application;
 
@@ -48,6 +48,14 @@ class BaseApplication extends Application
      * @type RegistryLike
      */
     protected $_registry;
+    /**
+     * @type string The absolute path of the registry
+     */
+    protected $_registryPath;
+    /**
+     * @type string Absolute path to a JSON file to seed new registries
+     */
+    protected $_registryTemplate;
 
     //******************************************************************************
     //* Methods
@@ -79,6 +87,22 @@ class BaseApplication extends Application
     }
 
     /**
+     * @param array $config
+     */
+    protected function _loadConfig( array $config = array() )
+    {
+        //  Set any of our variables first...
+        foreach ( $config as $_key => $_value )
+        {
+            if ( method_exists( $this, 'set' . $_key ) )
+            {
+                $this->{'set' . $_key}( $_value );
+                unset( $config[$_key] );
+            }
+        }
+    }
+
+    /**
      * Configure the command
      *
      * @param array $config Configuration settings
@@ -87,24 +111,77 @@ class BaseApplication extends Application
      */
     protected function _configure( array $config )
     {
-        $_name = $this->getName() ?: ( static::APP_NAME ?: ( isset( $argv, $argv[0] ) ? $argv[0] : basename( __CLASS__ ) ) );
+        $this->_loadConfig( $config );
 
-        $_registry = new Registry( $_name, dirname( __DIR__ ) . DIRECTORY_SEPARATOR . 'config' );
+        $_name = static::APP_NAME ?: ( isset( $argv, $argv[0] ) ? $argv[0] : basename( __CLASS__ ) );
+        $_path = $this->_registryPath;
 
+        $_registry = new Registry( $_name, $_path );
+
+        //  Does this registry have a node for me?
         if ( false === ( $_key = $_registry->has( $_name ) ) )
         {
-            $_node = new SettingsNode( $_name, $config );
-            $_registry->addNode( $_name, $_node );
+            //  Create one....
+            $_registry->set( $_name, new DataNode( $_name, $config ) );
         }
 
         $this->_registry = $_registry->save();
     }
 
     /**
-     * @return RegistryLike
+     * @return string
+     */
+    protected function _discoverRegistryPath()
+    {
+        return sys_get_temp_dir();
+    }
+
+    /**
+     * @return Registry
      */
     public function getRegistry()
     {
         return $this->_registry;
     }
+
+    /**
+     * @return string
+     */
+    public function getRegistryPath()
+    {
+        return $this->_registryPath;
+    }
+
+    /**
+     * @param string $registryPath
+     *
+     * @return BaseApplication
+     */
+    public function setRegistryPath( $registryPath )
+    {
+        $this->_registryPath = $registryPath;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRegistryTemplate()
+    {
+        return $this->_registryTemplate;
+    }
+
+    /**
+     * @param string $registryTemplate
+     *
+     * @return BaseApplication
+     */
+    public function setRegistryTemplate( $registryTemplate )
+    {
+        $this->_registryTemplate = $registryTemplate;
+
+        return $this;
+    }
+
 }
