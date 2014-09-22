@@ -19,8 +19,8 @@
 namespace DreamFactory\Library\Console\Commands;
 
 use DreamFactory\Library\Console\BaseApplication;
+use DreamFactory\Library\Console\Components\Registry;
 use DreamFactory\Library\Console\Enums\AnsiCodes;
-use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -146,7 +146,7 @@ class BaseCommand extends ContainerAwareCommand
     }
 
     /**
-     * @return RegistryLike
+     * @return Registry
      */
     public function getRegistry()
     {

@@ -61,11 +61,19 @@ class NodeBag extends BagOfHolding
         }
     }
 
-    public function replace( DataNode $node )
+    /**
+     * @param array $contents
+     *
+     * @return $this
+     */
+    public function replace( $contents = array() )
     {
-        $this->set( $node->getId(), $node );
+        if ( $contents instanceof DataNode )
+        {
+            return $this->set( $contents->getId(), $contents );
+        }
 
-        return $this;
+        return parent::replace( $contents );
     }
 
     /**

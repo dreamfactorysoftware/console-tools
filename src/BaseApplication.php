@@ -18,9 +18,8 @@
  */
 namespace DreamFactory\Library\Console;
 
-use DreamFactory\Library\Console\Components\DataNode;
+use DreamFactory\Library\Console\Components\Collection;
 use DreamFactory\Library\Console\Components\Registry;
-use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use Symfony\Component\Console\Application;
 
 /**
@@ -45,17 +44,9 @@ class BaseApplication extends Application
     //******************************************************************************
 
     /**
-     * @type RegistryLike
+     * @type Registry settings
      */
     protected $_registry;
-    /**
-     * @type string The absolute path of the registry
-     */
-    protected $_registryPath;
-    /**
-     * @type string Absolute path to a JSON file to seed new registries
-     */
-    protected $_registryTemplate;
 
     //******************************************************************************
     //* Methods
@@ -70,7 +61,19 @@ class BaseApplication extends Application
     {
         parent::__construct( $name, $version );
 
-        $this->_configure( $config );
+        $_config = new Collection( $config );
+
+        $_path = $_config->get( 'registry-path', getcwd(), true );
+        $_values = $_config->get( 'registry-values', array(), true );
+
+        if ( null !== ( $_template = $_config->get( 'registry-template', null, true ) ) )
+        {
+            $this->_registry = Registry::createFromFile( static::APP_NAME, $_path, $_template, $_values );
+        }
+        else
+        {
+            $this->_registry = new Registry( static::APP_NAME, $_path, $config );
+        }
     }
 
     /** @inheritdoc */
@@ -87,101 +90,11 @@ class BaseApplication extends Application
     }
 
     /**
-     * @param array $config
-     */
-    protected function _loadConfig( array $config = array() )
-    {
-        //  Set any of our variables first...
-        foreach ( $config as $_key => $_value )
-        {
-            if ( method_exists( $this, 'set' . $_key ) )
-            {
-                $this->{'set' . $_key}( $_value );
-                unset( $config[$_key] );
-            }
-        }
-    }
-
-    /**
-     * Configure the command
-     *
-     * @param array $config Configuration settings
-     *
-     * @return void
-     */
-    protected function _configure( array $config )
-    {
-        $this->_loadConfig( $config );
-
-        $_name = static::APP_NAME ?: ( isset( $argv, $argv[0] ) ? $argv[0] : basename( __CLASS__ ) );
-        $_path = $this->_registryPath;
-
-        $_registry = new Registry( $_name, $_path );
-
-        //  Does this registry have a node for me?
-        if ( false === ( $_key = $_registry->has( $_name ) ) )
-        {
-            //  Create one....
-            $_registry->set( $_name, new DataNode( $_name, $config ) );
-        }
-
-        $this->_registry = $_registry->save();
-    }
-
-    /**
-     * @return string
-     */
-    protected function _discoverRegistryPath()
-    {
-        return sys_get_temp_dir();
-    }
-
-    /**
      * @return Registry
      */
     public function getRegistry()
     {
         return $this->_registry;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRegistryPath()
-    {
-        return $this->_registryPath;
-    }
-
-    /**
-     * @param string $registryPath
-     *
-     * @return BaseApplication
-     */
-    public function setRegistryPath( $registryPath )
-    {
-        $this->_registryPath = $registryPath;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRegistryTemplate()
-    {
-        return $this->_registryTemplate;
-    }
-
-    /**
-     * @param string $registryTemplate
-     *
-     * @return BaseApplication
-     */
-    public function setRegistryTemplate( $registryTemplate )
-    {
-        $this->_registryTemplate = $registryTemplate;
-
-        return $this;
     }
 
 }

@@ -18,6 +18,8 @@
  */
 namespace DreamFactory\Library\Console\Interfaces;
 
+use DreamFactory\Library\Console\Components\Registry;
+
 /**
  * Something that acts like a registry
  */
@@ -28,11 +30,14 @@ interface RegistryLike extends NodeLike
     //******************************************************************************
 
     /**
-     * @param string $templateFile The absolute path to a JSON file
+     * @param string $id           The id of this registry
+     * @param string $path         Registry storage path
+     * @param string $file         The absolute path to a source JSON file
+     * @param array  $replacements Array of replacement KVP for file
      *
-     * @return ConfigFileLike
+     * @return Registry
      */
-    public static function createFromFile( $templateFile );
+    public static function createFromFile( $id, $path, $file, array $replacements = array() );
 
     /**
      * @return array

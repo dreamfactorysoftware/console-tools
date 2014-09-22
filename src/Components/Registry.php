@@ -18,7 +18,6 @@
  */
 namespace DreamFactory\Library\Console\Components;
 
-use DreamFactory\Library\Console\Bags\NodeBag;
 use DreamFactory\Library\Console\Interfaces\NodeLike;
 use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use Kisma\Core\Exceptions\FileSystemException;
@@ -26,7 +25,7 @@ use Kisma\Core\Exceptions\FileSystemException;
 /**
  * Manages a JSON registry
  */
-class Registry implements RegistryLike
+class Registry extends Collection implements RegistryLike
 {
     //******************************************************************************
     //* Constants
@@ -49,14 +48,6 @@ class Registry implements RegistryLike
      * @type string The path where the registry lives
      */
     protected $_path = null;
-    /**
-     * @type array An array of keys to normalized keys for faster lookups
-     */
-    protected $_normalized = array();
-    /**
-     * @type NodeBag
-     */
-    protected $_bag = null;
 
     //******************************************************************************
     //* Methods
@@ -65,17 +56,20 @@ class Registry implements RegistryLike
     /**
      * Creates a data registry
      *
-     * @param string $id   The short name for this registry
-     * @param string $path The absolute path of where the registry should be stored
+     * @param string $id       The short name for this registry
+     * @param string $path     The absolute path of where the registry should be stored
+     * @param array  $contents Initial contents
      *
      * @internal param string $filePath The path to where the registry lives
      */
-    public function __construct( $id, $path )
+    public function __construct( $id, $path, $contents = array() )
     {
         $this->_id = $id;
         $this->_path = $path;
 
-        $this->load( $id, $path );
+        parent::__construct( $contents );
+
+        $this->initialize();
     }
 
     /**
@@ -94,39 +88,11 @@ class Registry implements RegistryLike
      *
      * @return NodeLike
      */
-    public function initialize( array $contents = array() )
+    public function initialize( $contents = array() )
     {
-        $this->_contents = $contents;
+        $this->load( $this->_id, $this->_path );
 
         return $this;
-    }
-
-    /**
-     * @param array|object $contents
-     *
-     * @return string
-     */
-    public function encode( $contents = null )
-    {
-        $_contents = $contents ?: $this->_contents;
-
-        if ( empty( $_contents ) )
-        {
-            $_contents = array();
-        }
-
-        return JsonFile::encode( $_contents );
-    }
-
-    /**
-     * @param string $contents
-     * @param bool   $toArray
-     *
-     * @return string
-     */
-    public function decode( $contents, $toArray = true )
-    {
-        return json_decode( $contents, $toArray );
     }
 
     /**
@@ -136,14 +102,16 @@ class Registry implements RegistryLike
      */
     public function load()
     {
-        $_filePath = $this->_initializeRegistry( $this->_id, $this->_path );
+        $_filePath = $this->validateRegistryPath();
+        $_data = JsonFile::decode( file_get_contents( $_filePath ) );
 
-        $this->_contents = $this->decode( file_get_contents( $_filePath ) );
-
-        if ( false === $this->_contents || JSON_ERROR_NONE != json_last_error() )
+        if ( false === $_data || JSON_ERROR_NONE != json_last_error() )
         {
             throw new \RuntimeException( 'Registry invalid or corrupt.' );
         }
+
+        //  Add data to our bag
+        $this->merge( $_data );
 
         return $this;
     }
@@ -158,13 +126,8 @@ class Registry implements RegistryLike
      */
     public function save( $comment = null )
     {
-        $_filePath = $this->_initializeRegistry( $this->_path, $this->_id );
-        $_json = $this->encode();
-
-        if ( false === $_json || JSON_ERROR_NONE != json_last_error() )
-        {
-            throw new \RuntimeException( 'Error encoding registry: ' . json_last_error_msg() );
-        }
+        $_filePath = $this->validateRegistryPath();
+        $_json = $this->all( 'json' );
 
         if ( false === file_put_contents( $_filePath, $_json ) )
         {
@@ -177,88 +140,19 @@ class Registry implements RegistryLike
     }
 
     /**
-     * Tries to locate a place to store the registry
-     *
-     * @param Registry $registry
-     *
-     * @return string
+     * @inheritdoc
      */
-    public static function findRegistryPath( Registry $registry )
+    public static function createFromFile( $id, $path, $file, array $replacements = array() )
     {
-        $_paths = array(
-            $registry->getPath(),
-            getenv( 'HOME' ),
-            function ()
-            {
-                if ( function_exists( 'posix_getpwuid' ) && function_exists( 'posix_getuid' ) )
-                {
-                    $_user = posix_getpwuid( posix_getuid() );
-
-                    return ( isset( $_user, $_user['dir'] ) ? $_user['dir'] : getcwd() );
-                }
-            },
-            sys_get_temp_dir(),
-            getcwd(),
-        );
-
-        $_found = false;
-        $_path = null;
-
-        foreach ( $_paths as $_path )
+        if ( false === ( $_json = file_get_contents( $file ) ) )
         {
-            if ( empty( $_path ) || ( !is_dir( $_path ) && false === @mkdir( $_path, 0777, true ) ) )
-            {
-                continue;
-            }
-
-            $_found = true;
-            break;
+            throw new \InvalidArgumentException( 'The template file is invalid or does not exist.' );
         }
 
-        if ( !$_found || empty( $_path ) )
-        {
-            throw new \RuntimeException( 'Cannot find a place to store registry.' );
-        }
+        $_json = str_ireplace( array_keys( $replacements ), array_values( $replacements ), $_json );
+        $_data = JsonFile::decode( $_json );
 
-        return rtrim( $_path, DIRECTORY_SEPARATOR );
-    }
-
-    /**
-     * @param string $templateFile The absolute path to a JSON file
-     *
-     * @return Registry
-     */
-    public static function createFromFile( $templateFile )
-    {
-        return new static( null, $templateFile );
-    }
-
-    /**
-     * @param string $id
-     * @param string $path
-     * @param bool   $createIfNotFound If no registry is found, an empty file is created
-     *
-     * @return string the full path and file name of the registry file
-     */
-    protected function _initializeRegistry( $id, $path, $createIfNotFound = false )
-    {
-        $_filePath = ( $path ?: $this->_path ) . DIRECTORY_SEPARATOR . ( $id ?: $this->_id ) . static::DEFAULT_CONFIG_SUFFIX;
-        $_path = dirname( $_filePath );
-
-        if ( !is_dir( $_path ) && false === mkdir( $_path, 0777, true ) )
-        {
-            throw new \RuntimeException( 'Cannot create directory "' . $_path . '" for registry.' );
-        }
-
-        if ( $createIfNotFound && ( !is_file( $_filePath ) || !file_exists( $_filePath ) ) )
-        {
-            if ( false === file_put_contents( $_filePath, $this->encode() ) )
-            {
-                throw new \RuntimeException( 'The registry file "' . $_filePath . '" could not be created.' );
-            }
-        }
-
-        return $_filePath;
+        return new static( $id, $path, $_data );
     }
 
     /**
@@ -280,75 +174,39 @@ class Registry implements RegistryLike
     }
 
     /**
-     * Removes all bag items
+     * @param string $id
+     * @param string $path
+     * @param bool   $createIfNotFound
      *
-     * @return NodeLike
+     * @return string
      */
-    public function clear()
+    public function validateRegistryPath( $id = null, $path = null, $createIfNotFound = true )
     {
-        // TODO: Implement clear() method.
+        $_filePath = ( $path ?: $this->_path ) . DIRECTORY_SEPARATOR . ( $id ?: $this->_id ) . static::DEFAULT_CONFIG_SUFFIX;
+        $_path = dirname( $_filePath );
+
+        if ( !is_dir( $_path ) && false === mkdir( $_path, 0777, true ) )
+        {
+            throw new \RuntimeException( 'Cannot create directory "' . $_path . '" for registry.' );
+        }
+
+        if ( $createIfNotFound && ( !is_file( $_filePath ) || !file_exists( $_filePath ) ) )
+        {
+            if ( false === file_put_contents( $_filePath, '{}' ) )
+            {
+                throw new \RuntimeException( 'The registry file "' . $_filePath . '" could not be created.' );
+            }
+        }
+
+        return $_filePath;
     }
 
     /**
-     * @param string $key
-     * @param bool   $returnNormalizedKey If true and the key was found, the normalized key is returned. False otherwise
-     *
-     * @return bool|string The normalized key if found, or false
+     * @return string
      */
-    public function has( $key, $returnNormalizedKey = true )
+    public function getId()
     {
-        // TODO: Implement has() method.
+        return $this->_id;
     }
 
-    /**
-     * Retrieves a value at the given key location, or the default value if key isn't found.
-     * Setting $burnAfterReading to true will remove the key-value pair from the bag after it
-     * is retrieved. Call with no arguments to get back a KVP array of contents
-     *
-     * @param string $key
-     * @param mixed  $defaultValue
-     * @param bool   $burnAfterReading
-     *
-     * @throws \Kisma\Core\Exceptions\BagException
-     * @return mixed
-     */
-    public function get( $key = null, $defaultValue = null, $burnAfterReading = false )
-    {
-        // TODO: Implement get() method.
-    }
-
-    /**
-     * @param string $key
-     * @param mixed  $value
-     * @param bool   $overwrite
-     *
-     * @throws \Kisma\Core\Exceptions\BagException
-     * @return NodeLike
-     */
-    public function set( $key, $value, $overwrite = true )
-    {
-        // TODO: Implement set() method.
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return bool True if the key existed and was deleted
-     */
-    public function remove( $key )
-    {
-        // TODO: Implement remove() method.
-    }
-
-    /**
-     * Returns an array of all node entries
-     *
-     * @param string $format A data format in which to provide the results. Valid options are null and "json"
-     *
-     * @return array|string
-     */
-    public function all( $format = null )
-    {
-        // TODO: Implement all() method.
-    }
 }

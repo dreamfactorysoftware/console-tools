@@ -46,10 +46,10 @@ class BagOfHolding implements \IteratorAggregate, \Countable, NodeLike
     /**
      * Construct a bag
      *
-     * @param string $id       A name or id for this bag
-     * @param array  $contents An array of key value pairs to stuff into the bag
+     * @param string      $id       A name or id for this bag
+     * @param mixed|array $contents An array of key value pairs to stuff into the bag
      */
-    public function __construct( $id = null, array $contents = array() )
+    public function __construct( $id = null, $contents = array() )
     {
         $this->_id = $id;
 
@@ -114,11 +114,11 @@ class BagOfHolding implements \IteratorAggregate, \Countable, NodeLike
     /**
      * Replaces the current contents of the bag
      *
-     * @param array $contents The new contents
+     * @param array|mixed $contents The new contents
      *
      * @return $this
      */
-    public function replace( array $contents = array() )
+    public function replace( $contents = array() )
     {
         $this->_contents = $contents;
 

@@ -51,11 +51,10 @@ interface NodeLike
 
     /**
      * @param string $key
-     * @param bool   $returnNormalizedKey If true and the key was found, the normalized key is returned. False otherwise
      *
-     * @return bool|string The normalized key if found, or false
+     * @return bool
      */
-    public function has( $key, $returnNormalizedKey = true );
+    public function has( $key );
 
     /**
      * Retrieves a value at the given key location, or the default value if key isn't found.
