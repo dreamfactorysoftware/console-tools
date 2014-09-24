@@ -16,29 +16,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace DreamFactory\Library\Console\Components;
+namespace DreamFactory\Library\Console\Enums;
 
-use DreamFactory\Library\Console\Interfaces\NodeLike;
+use Kisma\Core\Enums\SeedEnum;
 
 /**
- * A settings node. Has meta data
+ * RegistryKeys
+ * Enumerations of pre-defined application config keys
  */
-class SettingsNode extends DataNode
+class RegistryKeys extends SeedEnum
 {
     //******************************************************************************
-    //* Methods
+    //* Constants
     //******************************************************************************
 
     /**
-     * @param bool $addComment If true, a "created" comment is added to the schema
-     *
-     * @return array|NodeLike
+     * @type string The top-level server key
      */
-    public function getDefaultSchema( $addComment = true )
-    {
-        $_metaData = new MetaDataNode();
-        $_schema = $_metaData->getDefaultSchema( $addComment );
-
-        return array($this->_id => $_schema);
-    }
+    const SERVERS = 'servers';
+    /**
+     * @type string The top-level key for storing db servers
+     */
+    const DB_SERVER = 'db';
+    /**
+     * @type string The top-level key for storing web servers
+     */
+    const WEB_SERVER = 'web';
+    /**
+     * @type string The top-level key for storing app servers
+     */
+    const APP_SERVER = 'app';
+    /**
+     * @type string The level key for storing servers
+     */
+    const SERVER_ID = 'server-id';
 }
