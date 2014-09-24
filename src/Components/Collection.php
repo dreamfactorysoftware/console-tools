@@ -49,7 +49,7 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
         switch ( $format )
         {
             case 'json':
-                return JsonFile::encode( $this->_contents );
+               return JsonFile::encode( $this->_contents );
         }
 
         return $this->_contents;
@@ -129,7 +129,7 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
 
         if ( is_array( $this->_contents[$key] ) )
         {
-            $this->_contents[$key][] = $value;
+            $this->_contents[$key] = array_merge( $this->_contents[$key], $value );
 
             return $this;
         }

@@ -69,6 +69,7 @@ class BaseApplication extends Application
         if ( null !== ( $_template = $_config->get( 'registry-template', null, true ) ) )
         {
             $this->_registry = Registry::createFromFile( static::APP_NAME, $_path, $_template, $_values );
+            $this->_registry->load();
         }
         else
         {

@@ -18,7 +18,9 @@
  */
 namespace DreamFactory\Tools\Fabric\Components;
 
+use DreamFactory\Library\Console\Bags\GenericBag;
 use DreamFactory\Library\Console\Components\JsonFile;
+use DreamFactory\Library\Console\Components\MetaDataBag;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
@@ -31,7 +33,11 @@ class FabricSettings
     //******************************************************************************
 
     /**
-     * @type ParameterBag
+     * @type GenericBag
+     */
+    protected $_settings;
+    /**
+     * @type MetaDataBag
      */
     public $metadata;
     /**
@@ -57,10 +63,10 @@ class FabricSettings
      */
     public function initialize( array $appServers = array(), array $dbServers = array(), array $webServers = array(), array $metadata = array() )
     {
-        $this->appServers = new ParameterBag( $appServers );
-        $this->dbServers = new ParameterBag( $dbServers );
-        $this->webServers = new ParameterBag( $webServers );
-        $this->metadata = new ParameterBag( $metadata );
+        $this->_settings['servers.app'] = new ParameterBag( 'servers.app', $appServers );
+        $this->_settings['servers.app'] = new ParameterBag( 'servers.db', $dbServers );
+        $this->_settings['servers.app'] = new ParameterBag( 'servers.web', $webServers );
+        $this->_settings['servers.app'] = new MetaDataBag( '_metadata', $metadata );
     }
 
     /**
@@ -86,9 +92,27 @@ class FabricSettings
 
         foreach ( $_data as $_key => $_value )
         {
-            if ( property_exists( $_settings, $_key ) && $_settings->{$_key} instanceof ParameterBag )
+            switch ( $_key )
             {
-                $_settings->{$_key}->add( $_value );
+                case 'servers.app':
+                    $_settings->appServers = $_value;
+                    break;
+
+                case 'servers.db':
+                    $_settings->dbServers = $_value;
+                    break;
+
+                case 'servers.web':
+                    $_settings->webServers = $_value;
+                    break;
+
+                case '_metadata':
+                    $_settings->metadata = $_value;
+                    break;
+
+                default:
+                    $_settings->{$_key} = $_value;
+                    break;
             }
         }
 

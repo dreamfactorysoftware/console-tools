@@ -68,8 +68,6 @@ class Registry extends Collection implements RegistryLike
         $this->_path = $path;
 
         parent::__construct( $contents );
-
-        $this->initialize();
     }
 
     /**
@@ -90,9 +88,7 @@ class Registry extends Collection implements RegistryLike
      */
     public function initialize( $contents = array() )
     {
-        $this->load( $this->_id, $this->_path );
-
-        return $this;
+        return $this->load();
     }
 
     /**
@@ -103,7 +99,8 @@ class Registry extends Collection implements RegistryLike
     public function load()
     {
         $_filePath = $this->validateRegistryPath();
-        $_data = JsonFile::decode( file_get_contents( $_filePath ) );
+
+        $_data = JsonFile::decodeFile( $_filePath );
 
         if ( false === $_data || JSON_ERROR_NONE != json_last_error() )
         {
@@ -127,9 +124,8 @@ class Registry extends Collection implements RegistryLike
     public function save( $comment = null )
     {
         $_filePath = $this->validateRegistryPath();
-        $_json = $this->all( 'json' );
 
-        if ( false === file_put_contents( $_filePath, $_json ) )
+        if ( false === file_put_contents( $_filePath, $this->all( 'json' ) ) )
         {
             throw new FileSystemException( 'Error saving registry: ' . $_filePath );
         }
@@ -199,14 +195,6 @@ class Registry extends Collection implements RegistryLike
         }
 
         return $_filePath;
-    }
-
-    /**
-     * @return string
-     */
-    public function getId()
-    {
-        return $this->_id;
     }
 
 }

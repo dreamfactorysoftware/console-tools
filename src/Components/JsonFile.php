@@ -204,6 +204,31 @@ class JsonFile
     }
 
     /**
+     * Decodes a JSON string
+     *
+     * @param string $file The absolute path to the file to decode
+     * @param bool   $asArray
+     * @param int    $depth
+     * @param int    $options
+     *
+     * @return mixed
+     */
+    public static function decodeFile( $file, $asArray = true, $depth = 512, $options = 0 )
+    {
+        if ( !file_exists( $file ) || !is_readable( $file ) || false === ( $_json = file_get_contents( $file ) ) )
+        {
+            throw new \InvalidArgumentException( 'The file "' . $file . '" does not exist or cannot be read.' );
+        }
+
+        if ( false === ( $_data = json_decode( $_json, $asArray, $depth, $options ) ) || JSON_ERROR_NONE != json_last_error() )
+        {
+            throw new \InvalidArgumentException( 'The data could not be decoded: ' . json_last_error_msg() );
+        }
+
+        return $_data;
+    }
+
+    /**
      * @return string
      */
     public function getFilePath()
