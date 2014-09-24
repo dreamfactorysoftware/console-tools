@@ -30,7 +30,7 @@ class CommandHelper
     /**
      * @type string Default date() format
      */
-    const DEFAULT_TIMESTAMP_FORMAT = 'Y-m-d H:i:s';
+    const DEFAULT_TIMESTAMP_FORMAT = 'c';
 
     //******************************************************************************
     //* Methods
@@ -43,10 +43,24 @@ class CommandHelper
      *
      * @return bool|string
      */
-    public static function getCurrentTimestamp( $format = null )
+    public static function timestamp( $format = null )
     {
         $_format = $format ?: static::DEFAULT_TIMESTAMP_FORMAT;
 
         return date( $_format );
+    }
+
+    /**
+     * Wraps a string in a console tag (i.e. <comment>, <info>, etc.)
+     *
+     * @param string $tag
+     * @param string $content
+     * @param bool   $quoted If true, quotes will be prefixed and suffixed.
+     *
+     * @return string
+     */
+    public static function wrap( $tag, $content, $quoted = true )
+    {
+        return ( $quoted ? '"' : null ) . '<' . $tag . '>' . $content . '</' . $tag . '>' . ( $quoted ? '"' : null );
     }
 }
