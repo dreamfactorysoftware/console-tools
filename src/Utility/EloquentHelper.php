@@ -34,6 +34,18 @@ class EloquentHelper
      * @type string The default pattern of files to auto-discover "_*.database.config.php" is the default.
      */
     const DEFAULT_CONFIG_PATTERN = '_*.database.config.php';
+    /**
+     * @type string
+     */
+    const DEFAULT_COLLATION = 'utf8_unicode_ci';
+    /**
+     * @type string
+     */
+    const DEFAULT_CHARSET = 'utf8';
+    /**
+     * @type string
+     */
+    const DEFAULT_DRIVER = 'mysql';
 
     //******************************************************************************
     //* Members
@@ -85,7 +97,7 @@ class EloquentHelper
                 {
                     foreach ( $_config as $_id => $_dbConfig )
                     {
-                        static::addConnection( $_dbConfig, $_id );
+                        static::addConnection( static::createCompleteConfig( $_dbConfig ), $_id );
                         $_found = true;
                     }
                 }
@@ -141,4 +153,61 @@ class EloquentHelper
         static::$_capsule->bootEloquent();
     }
 
+    /**
+     * Given a minimal configuration for a database, fill in the missing requirements
+     *
+     * @param array $db
+     *
+     * @return array
+     */
+    public static function createCompleteConfig( array $db = array() )
+    {
+        static $_defaults = array(
+            '{driver}'    => self::DEFAULT_DRIVER,
+            '{charset}'   => self::DEFAULT_CHARSET,
+            '{collation}' => self::DEFAULT_COLLATION,
+            '{prefix}'    => '',
+        );
+
+        static $_template = <<<JSON
+{
+    "read": {
+        "host":  "{host}"
+    },
+    "write": {
+        "host":  "{host}"
+    },
+    "driver":    "{driver}",
+    "database":  "{database}",
+    "username":  "{username}",
+    "password":  "{password}",
+    "charset":   "{charset}",
+    "collation": "{collation}",
+    "prefix":    "{prefix}"
+}
+JSON;
+        //  Fix database-name => database
+        if ( array_key_exists( 'database-name', $db ) )
+        {
+            $db['database'] = $db['database-name'];
+            unset( $db['database-name'] );
+        }
+
+        //  Wrap the keys with {}
+        foreach ( $db as $_key => $_value )
+        {
+            $db['{' . $_key . '}'] = $_value;
+            unset( $db[$_key] );
+        }
+
+        $_config = array_merge( $_defaults, $db );
+        $_config = json_decode( str_ireplace( array_keys( $_config ), array_values( $_config ), $_template ), true );
+
+        if ( false === $_config || JSON_ERROR_NONE != json_last_error() )
+        {
+            throw new \RuntimeException( 'Database configuration file could not be read: ' . print_r( $db, true ) );
+        }
+
+        return $_config;
+    }
 }
