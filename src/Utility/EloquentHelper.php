@@ -18,6 +18,7 @@
  */
 namespace DreamFactory\Library\Console\Utility;
 
+use DreamFactory\Tools\Fabric\Exceptions\FabricException;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 /**
@@ -60,11 +61,12 @@ class EloquentHelper
      * @param string $path
      * @param string $pattern
      *
+     * @throws FabricException
      * @return bool True if files were autoloaded
      */
     public static function autoload( $path, $pattern = self::DEFAULT_CONFIG_PATTERN )
     {
-        $_files = glob( $pattern, GLOB_MARK );
+        $_files = glob( $path . DIRECTORY_SEPARATOR . $pattern, GLOB_MARK );
         $_found = false;
 
         foreach ( $_files as $_file )
@@ -77,7 +79,7 @@ class EloquentHelper
             if ( is_file( $_file ) )
             {
                 /** @noinspection PhpIncludeInspection */
-                $_config = include( $path . DIRECTORY_SEPARATOR . $_file );
+                $_config = include( $_file );
 
                 if ( is_array( $_config ) )
                 {
@@ -88,6 +90,11 @@ class EloquentHelper
                     }
                 }
             }
+        }
+
+        if ( !$_found )
+        {
+            throw new FabricException( 'No database configuration found.' );
         }
 
         return $_found;
