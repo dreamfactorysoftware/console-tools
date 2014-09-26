@@ -21,6 +21,7 @@ namespace DreamFactory\Library\Console;
 use DreamFactory\Library\Console\Components\Collection;
 use DreamFactory\Library\Console\Components\Registry;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A command that reads/writes a JSON configuration file
@@ -98,4 +99,16 @@ class BaseApplication extends Application
         return $this->_registry;
     }
 
+    /**
+     * Renders a caught exception.
+     *
+     * @param \Exception      $e      An exception instance
+     * @param OutputInterface $output An OutputInterface instance
+     */
+    public function renderException( $e, $output )
+    {
+        $output->writeln( $this->getLongVersion() . ' > <comment>ERROR</comment> ' );
+
+        parent::renderException( $e, $output );
+    }
 }
