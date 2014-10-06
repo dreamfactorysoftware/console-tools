@@ -12,8 +12,8 @@
 	],
 	"minimum-stability": "dev",
 	"require":           {
-		"php":                      ">=5.4.6",
-		"kisma/kisma":              "~0.2@dev",
+		"php":                      "~5.3",
+		"kisma/kisma":              "~0.2",
 		"illuminate/database":      "~4.2",
 		"symfony/console":          "~2.4",
 		"symfony/framework-bundle": "~2.4"
