@@ -176,4 +176,17 @@ class BaseCommand extends ContainerAwareCommand
     {
         return $this->_output;
     }
+
+    /**
+     * Gets the work queue
+     *
+     * @param null|string|array $configFile Either /path/to/config/file or array of config parameters or nada
+     *
+     * @return \DreamFactory\Services\CouchDb\WorkQueue
+     */
+    public function getQueue( $configFile = null )
+    {
+        /** @noinspection PhpUndefinedMethodInspection */
+        return $this->getApplication()->getQueue( $configFile );
+    }
 }

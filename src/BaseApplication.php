@@ -20,6 +20,8 @@ namespace DreamFactory\Library\Console;
 
 use DreamFactory\Library\Console\Components\Collection;
 use DreamFactory\Library\Console\Components\Registry;
+use DreamFactory\Services\CouchDb\WorkQueue;
+use Kisma\Core\Interfaces\ConsumerLike;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -29,7 +31,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Additional Settings of $configName and $configPath
  * available to customize storage location
  */
-class BaseApplication extends Application
+class BaseApplication extends Application implements ConsumerLike
 {
     //******************************************************************************
     //* Constants
@@ -39,6 +41,10 @@ class BaseApplication extends Application
      * @type string The name of this application
      */
     const APP_NAME = null;
+    /**
+     * @type string The default name of our work queue configuration file
+     */
+    const DEFAULT_QUEUE_CONFIG_FILE = 'work_queue.config.php';
 
     //******************************************************************************
     //* Members
@@ -48,6 +54,10 @@ class BaseApplication extends Application
      * @type Registry settings
      */
     protected $_registry;
+    /**
+     * @type string Paths
+     */
+    protected $_paths;
 
     //******************************************************************************
     //* Methods
@@ -77,6 +87,8 @@ class BaseApplication extends Application
         {
             $this->_registry = new Registry( static::APP_NAME, $_path, $config );
         }
+
+        $this->_setApplicationPaths();
     }
 
     /** @inheritdoc */
@@ -111,5 +123,94 @@ class BaseApplication extends Application
         $output->writeln( $this->getLongVersion() . ' > <comment>ERROR</comment> ' );
 
         parent::renderException( $e, $output );
+    }
+
+    /**
+     * @param null|string|array $configFile Either /path/to/config/file or array of config parameters or nada
+     *
+     * @return \DreamFactory\Services\CouchDb\WorkQueue
+     */
+    public function getQueue( $configFile = null )
+    {
+        /** @var WorkQueue $_queue */
+        static $_queue;
+
+        if ( !empty( $_queue ) )
+        {
+            return $_queue;
+        }
+
+        if ( null === ( $_queue = \Kisma::get( 'app.work_queue' ) ) )
+        {
+            if ( is_array( $configFile ) )
+            {
+                $_config = $configFile;
+            }
+            else
+            {
+                //  If no config file exists for this application, then no queue will be available
+                $_configFile = $configFile ?: $this->getAppPath( 'config' ) . DIRECTORY_SEPARATOR . static::DEFAULT_QUEUE_CONFIG_FILE;
+
+                if ( !file_exists( $_configFile ) )
+                {
+                    //  No queue config means no queue
+                    return false;
+                }
+
+                /** @noinspection PhpIncludeInspection */
+                $_config = @include( $_configFile );
+
+                if ( !is_array( $_config ) )
+                {
+                    throw new \RuntimeException( 'The work queue configuration file did not return an array.' );
+                }
+            }
+
+            \Kisma::set(
+                'app.work_queue',
+                $_queue = new WorkQueue( $this, $_config )
+            );
+        }
+
+        return $_queue;
+    }
+
+    /**
+     * Sets the various paths used by this app
+     */
+    protected function _setApplicationPaths()
+    {
+        global $argv;
+
+        if ( !isset( $argv ) )
+        {
+            throw new \LogicException( 'No arguments in $argv.' );
+        }
+
+        $this->_paths = array(
+            'base'   => $_basePath = dirname( dirname( $argv[0] ) ),
+            'config' => $_basePath . DIRECTORY_SEPARATOR . 'config',
+            'vendor' => $_basePath . DIRECTORY_SEPARATOR . 'vendor',
+        );
+    }
+
+    /**
+     * Retrieves one the application paths from settings. These can be "base", "config", or "vendor"
+     *
+     * @param string $which
+     */
+    public function getAppPath( $which = null )
+    {
+        if ( null === $which )
+        {
+            return $this->_paths;
+        }
+
+        if ( isset( $this->_paths[$which] ) )
+        {
+            return $this->_paths[$which];
+        }
+
+        throw new \InvalidArgumentException( 'The path "' . $which . '" was not found.' );
     }
 }
