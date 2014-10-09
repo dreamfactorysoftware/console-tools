@@ -78,6 +78,7 @@ class BaseApplication extends Application implements ConsumerLike
         $_path = $_config->get( 'registry-path', getcwd(), true );
         $_values = $_config->get( 'registry-values', array(), true );
 
+
         if ( null !== ( $_template = $_config->get( 'registry-template', null, true ) ) )
         {
             $this->_registry = Registry::createFromFile( static::APP_NAME, $_path, $_template, $_values );

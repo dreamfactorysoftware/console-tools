@@ -935,12 +935,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/FrameworkBundle.git",
-                "reference": "ae3b59c5d8154900f73cb3f4d7c681277ffa0e0f"
+                "reference": "7d0dde82483e29ff975f9f7aa38838ee451224b8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/FrameworkBundle/zipball/ae3b59c5d8154900f73cb3f4d7c681277ffa0e0f",
-                "reference": "ae3b59c5d8154900f73cb3f4d7c681277ffa0e0f",
+                "url": "https://api.github.com/repos/symfony/FrameworkBundle/zipball/7d0dde82483e29ff975f9f7aa38838ee451224b8",
+                "reference": "7d0dde82483e29ff975f9f7aa38838ee451224b8",
                 "shasum": ""
             },
             "require": {
@@ -1006,7 +1006,7 @@
             ],
             "description": "Symfony FrameworkBundle",
             "homepage": "http://symfony.com",
-            "time": "2014-10-06 11:17:54"
+            "time": "2014-10-06 13:17:46"
         },
         {
             "name": "symfony/http-foundation",
@@ -1015,12 +1015,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/HttpFoundation.git",
-                "reference": "8f39f4c3a2903883898d1026f781f0f42672f9bc"
+                "reference": "c24942a7ec2d8409d1f60d02c4460ca8317e885a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/8f39f4c3a2903883898d1026f781f0f42672f9bc",
-                "reference": "8f39f4c3a2903883898d1026f781f0f42672f9bc",
+                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/c24942a7ec2d8409d1f60d02c4460ca8317e885a",
+                "reference": "c24942a7ec2d8409d1f60d02c4460ca8317e885a",
                 "shasum": ""
             },
             "require": {
@@ -1059,7 +1059,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "http://symfony.com",
-            "time": "2014-10-03 05:26:43"
+            "time": "2014-10-07 14:06:18"
         },
         {
             "name": "symfony/http-kernel",
@@ -1068,12 +1068,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/HttpKernel.git",
-                "reference": "1eef435193528ee1291287c2a8fc18294bd00520"
+                "reference": "a32e518e25bb435a5ef18bec76d4942b4cbb98e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/HttpKernel/zipball/1eef435193528ee1291287c2a8fc18294bd00520",
-                "reference": "1eef435193528ee1291287c2a8fc18294bd00520",
+                "url": "https://api.github.com/repos/symfony/HttpKernel/zipball/a32e518e25bb435a5ef18bec76d4942b4cbb98e6",
+                "reference": "a32e518e25bb435a5ef18bec76d4942b4cbb98e6",
                 "shasum": ""
             },
             "require": {
@@ -1134,7 +1134,7 @@
             ],
             "description": "Symfony HttpKernel Component",
             "homepage": "http://symfony.com",
-            "time": "2014-10-05 08:46:57"
+            "time": "2014-10-06 12:52:17"
         },
         {
             "name": "symfony/routing",
@@ -1143,12 +1143,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Routing.git",
-                "reference": "1c7785e21edd87da5570fc0182742bf66f95b52d"
+                "reference": "11ed40b4b85222865ac4d01d0f64696d42f32fd9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Routing/zipball/1c7785e21edd87da5570fc0182742bf66f95b52d",
-                "reference": "1c7785e21edd87da5570fc0182742bf66f95b52d",
+                "url": "https://api.github.com/repos/symfony/Routing/zipball/11ed40b4b85222865ac4d01d0f64696d42f32fd9",
+                "reference": "11ed40b4b85222865ac4d01d0f64696d42f32fd9",
                 "shasum": ""
             },
             "require": {
@@ -1201,7 +1201,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2014-10-01 05:53:11"
+            "time": "2014-10-07 14:17:15"
         },
         {
             "name": "symfony/security-core",
@@ -1905,18 +1905,12 @@
             "time": "2014-10-05 13:53:50"
         }
     ],
-    "aliases": [
-
-    ],
+    "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [
-
-    ],
+    "stability-flags": [],
     "prefer-stable": false,
     "platform": {
         "php": "~5.3"
     },
-    "platform-dev": [
-
-    ]
+    "platform-dev": []
 }
