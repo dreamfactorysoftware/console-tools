@@ -20,7 +20,8 @@ namespace DreamFactory\Library\Console;
 
 use DreamFactory\Library\Console\Components\Collection;
 use DreamFactory\Library\Console\Components\Registry;
-use DreamFactory\Services\CouchDb\WorkQueue;
+use DreamFactory\Library\Console\Utility\CommandHelper;
+use DreamFactory\Tools\Fabric\Components\WorkQueue;
 use Kisma\Core\Interfaces\ConsumerLike;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -72,7 +73,7 @@ class BaseApplication extends Application implements ConsumerLike
     {
         parent::__construct( $name, $version );
 
-        $_config = new Collection( $config );
+        $_config = new Collection( $this->addConfigDefaults( $config ) );
 
         $_path = $_config->get( 'registry-path', getcwd(), true );
         $_values = $_config->get( 'registry-values', array(), true );
@@ -112,6 +113,21 @@ class BaseApplication extends Application implements ConsumerLike
     }
 
     /**
+     * @return string
+     */
+    public function getRegistryPath()
+    {
+        $_path = getenv( 'HOME' );
+
+        if ( empty( $_path ) )
+        {
+            $_path = getcwd();
+        }
+
+        return $_path . DIRECTORY_SEPARATOR . '.dreamfactory';
+    }
+
+    /**
      * Renders a caught exception.
      *
      * @param \Exception      $e      An exception instance
@@ -127,7 +143,7 @@ class BaseApplication extends Application implements ConsumerLike
     /**
      * @param null|string|array $configFile Either /path/to/config/file or array of config parameters or nada
      *
-     * @return \DreamFactory\Services\CouchDb\WorkQueue
+     * @return \DreamFactory\Tools\Fabric\Components\WorkQueue
      */
     public function getQueue( $configFile = null )
     {
@@ -167,11 +183,45 @@ class BaseApplication extends Application implements ConsumerLike
 
             \Kisma::set(
                 'app.work_queue',
-                $_queue = new WorkQueue( $this, $_config )
+                $_queue = new WorkQueue( $_config )
             );
         }
 
         return $_queue;
+    }
+
+    /**
+     * Ensures that the necessary configuration defaults are in place
+     *
+     * @param array $config
+     *
+     * @return array
+     */
+    public function addConfigDefaults( array $config = array() )
+    {
+        $_timestamp = CommandHelper::timestamp();
+
+        //  Our default registry template
+        $config = array_merge(
+            array(
+                'registry-path'     => $this->getRegistryPath(),
+                'registry-template' =>
+                    dirname( __DIR__ ) .
+                    DIRECTORY_SEPARATOR .
+                    'config' .
+                    DIRECTORY_SEPARATOR .
+                    'templates' .
+                    DIRECTORY_SEPARATOR .
+                    'registry.schema.json',
+                'registry-values'   => array(
+                    '{created_at}' => $_timestamp,
+                    '{updated_at}' => $_timestamp,
+                ),
+            ),
+            $config
+        );
+
+        return $config;
     }
 
     /**
