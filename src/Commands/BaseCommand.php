@@ -21,6 +21,7 @@ namespace DreamFactory\Library\Console\Commands;
 use DreamFactory\Library\Console\BaseApplication;
 use DreamFactory\Library\Console\Components\Registry;
 use DreamFactory\Library\Console\Enums\AnsiCodes;
+use DreamFactory\Library\Fabric\Queue\Components\FabricQueue;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -182,7 +183,7 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @param null|string|array $configFile Either /path/to/config/file or array of config parameters or nada
      *
-     * @return \DreamFactory\Services\CouchDb\WorkQueue
+     * @return FabricQueue
      */
     public function getQueue( $configFile = null )
     {

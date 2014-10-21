@@ -21,7 +21,6 @@ namespace DreamFactory\Library\Console;
 use DreamFactory\Library\Console\Components\Collection;
 use DreamFactory\Library\Console\Components\Registry;
 use DreamFactory\Library\Console\Utility\CommandHelper;
-use DreamFactory\Tools\Fabric\Components\WorkQueue;
 use Kisma\Core\Interfaces\ConsumerLike;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -42,10 +41,6 @@ class BaseApplication extends Application implements ConsumerLike
      * @type string The name of this application
      */
     const APP_NAME = null;
-    /**
-     * @type string The default name of our work queue configuration file
-     */
-    const DEFAULT_QUEUE_CONFIG_FILE = 'work_queue.config.php';
 
     //******************************************************************************
     //* Members
@@ -77,7 +72,6 @@ class BaseApplication extends Application implements ConsumerLike
 
         $_path = $_config->get( 'registry-path', getcwd(), true );
         $_values = $_config->get( 'registry-values', array(), true );
-
 
         if ( null !== ( $_template = $_config->get( 'registry-template', null, true ) ) )
         {
@@ -139,56 +133,6 @@ class BaseApplication extends Application implements ConsumerLike
         $output->writeln( $this->getLongVersion() . ' > <comment>ERROR</comment> ' );
 
         parent::renderException( $e, $output );
-    }
-
-    /**
-     * @param null|string|array $configFile Either /path/to/config/file or array of config parameters or nada
-     *
-     * @return \DreamFactory\Tools\Fabric\Components\WorkQueue
-     */
-    public function getQueue( $configFile = null )
-    {
-        /** @var WorkQueue $_queue */
-        static $_queue;
-
-        if ( !empty( $_queue ) )
-        {
-            return $_queue;
-        }
-
-        if ( null === ( $_queue = \Kisma::get( 'app.work_queue' ) ) )
-        {
-            if ( is_array( $configFile ) )
-            {
-                $_config = $configFile;
-            }
-            else
-            {
-                //  If no config file exists for this application, then no queue will be available
-                $_configFile = $configFile ?: $this->getAppPath( 'config' ) . DIRECTORY_SEPARATOR . static::DEFAULT_QUEUE_CONFIG_FILE;
-
-                if ( !file_exists( $_configFile ) )
-                {
-                    //  No queue config means no queue
-                    return false;
-                }
-
-                /** @noinspection PhpIncludeInspection */
-                $_config = @include( $_configFile );
-
-                if ( !is_array( $_config ) )
-                {
-                    throw new \RuntimeException( 'The work queue configuration file did not return an array.' );
-                }
-            }
-
-            \Kisma::set(
-                'app.work_queue',
-                $_queue = new WorkQueue( $_config )
-            );
-        }
-
-        return $_queue;
     }
 
     /**

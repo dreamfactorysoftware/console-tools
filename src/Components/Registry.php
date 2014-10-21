@@ -59,8 +59,6 @@ class Registry extends Collection implements RegistryLike
      * @param string $id       The short name for this registry
      * @param string $path     The absolute path of where the registry should be stored
      * @param array  $contents Initial contents
-     *
-     * @internal param string $filePath The path to where the registry lives
      */
     public function __construct( $id, $path, $contents = array() )
     {
