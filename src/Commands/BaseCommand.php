@@ -18,14 +18,18 @@
  */
 namespace DreamFactory\Library\Console\Commands;
 
-use Symfony\Component\Console\Command\Command;
+use DreamFactory\Library\Console\BaseApplication;
+use DreamFactory\Library\Console\Components\Registry;
+use DreamFactory\Library\Console\Enums\AnsiCodes;
+use DreamFactory\Library\Fabric\Queue\Components\FabricQueue;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Adds some additional functionality to the Command class
  */
-class ToolCommand extends Command
+class BaseCommand extends ContainerAwareCommand
 {
     //******************************************************************************
     //* Members
@@ -143,6 +147,22 @@ class ToolCommand extends Command
     }
 
     /**
+     * @return Registry
+     */
+    public function getRegistry()
+    {
+        /** @type BaseApplication $_app */
+        $_app = $this->getApplication();
+
+        if ( empty( $_app ) )
+        {
+            throw new \RuntimeException( 'The $application property has not been set for this command.' );
+        }
+
+        return $_app->getRegistry();
+    }
+
+    /**
      * @return InputInterface
      */
     public function getInput()
@@ -156,5 +176,18 @@ class ToolCommand extends Command
     public function getOutput()
     {
         return $this->_output;
+    }
+
+    /**
+     * Gets the work queue
+     *
+     * @param null|string|array $configFile Either /path/to/config/file or array of config parameters or nada
+     *
+     * @return FabricQueue
+     */
+    public function getQueue( $configFile = null )
+    {
+        /** @noinspection PhpUndefinedMethodInspection */
+        return $this->getApplication()->getQueue( $configFile );
     }
 }

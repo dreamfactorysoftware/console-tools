@@ -16,4 +16,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace DreamFactory\Tools\Fabric;
+use DreamFactory\Library\Console\Utility\EloquentHelper;
+
+/**
+ * This is the file that kicks off the Eloquent configuration stuff
+ */
+
+//  Autoload any found files
+if ( EloquentHelper::autoload( __DIR__ ) )
+{
+    //  Boot the whole shebang if autoload did anything
+    EloquentHelper::boot();
+}

@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the DreamFactory Freezer(tm)
+ * This file is part of the DreamFactory Console Tools Library
  *
  * Copyright 2014 DreamFactory Software, Inc. <support@dreamfactory.com>
  *
@@ -16,58 +16,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace DreamFactory\Library\Console\Commands;
-
-use DreamFactory\Library\Console\Components\ConfigFile;
-use Kisma\Core\Exceptions\FileSystemException;
+namespace DreamFactory\Library\Console\Utility;
 
 /**
- * A command that reads/writes a JSON configuration file
+ * Command helpers
  */
-class BaseConfigCommand extends BaseCommand
+class CommandHelper
 {
     //******************************************************************************
-    //* Members
+    //* Constant
     //******************************************************************************
 
     /**
-     * @type ConfigFile
+     * @type string Default date() format
      */
-    protected $_configFile;
+    const DEFAULT_TIMESTAMP_FORMAT = 'c';
 
     //******************************************************************************
     //* Methods
     //******************************************************************************
 
     /**
-     * @param string $name   The name of the command
-     * @param array  $config The command configuration
-     */
-    public function __construct( $name = null, array $config = array(), $file = null, $path = null )
-    {
-        parent::__construct( $name, $config );
-
-        $this->_configFile = new ConfigFile($file,$path);
-    }
-
-    /**
-     * @return ConfigFile
-     */
-    public function getConfigFile()
-    {
-        return $this->_configFile;
-    }
-
-    /**
-     * @param ConfigFile $configFile
+     * Generates a timestamp in a consistent format.
      *
-     * @return BaseConfigCommand
+     * @param string $format Valid date() format to override configured or default of 'Y-m-d H:i:s' will be used
+     *
+     * @return bool|string
      */
-    public function setConfigFile( $configFile )
+    public static function timestamp( $format = null )
     {
-        $this->_configFile = $configFile;
+        $_format = $format ?: static::DEFAULT_TIMESTAMP_FORMAT;
 
-        return $this;
+        return date( $_format );
     }
 
+    /**
+     * Wraps a string in a console tag (i.e. <comment>, <info>, etc.)
+     *
+     * @param string $tag
+     * @param string $content
+     * @param bool   $quoted If true, quotes will be prefixed and suffixed.
+     *
+     * @return string
+     */
+    public static function wrap( $tag, $content, $quoted = true )
+    {
+        return ( $quoted ? '"' : null ) . '<' . $tag . '>' . $content . '</' . $tag . '>' . ( $quoted ? '"' : null );
+    }
 }
