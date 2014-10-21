@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f659ee404cf9830c74a992136c7bfc39",
+    "hash": "7fdc34116da16e176e6de6c658731b5d",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -80,12 +80,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/cache.git",
-                "reference": "f7a1d660c521461b835dc31af0f6c9836769e917"
+                "reference": "912e8a11ce3c75a630b225dd82aed83e00943ed5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/cache/zipball/f7a1d660c521461b835dc31af0f6c9836769e917",
-                "reference": "f7a1d660c521461b835dc31af0f6c9836769e917",
+                "url": "https://api.github.com/repos/doctrine/cache/zipball/912e8a11ce3c75a630b225dd82aed83e00943ed5",
+                "reference": "912e8a11ce3c75a630b225dd82aed83e00943ed5",
                 "shasum": ""
             },
             "require": {
@@ -141,7 +141,7 @@
                 "cache",
                 "caching"
             ],
-            "time": "2014-09-29 13:28:56"
+            "time": "2014-10-20 19:28:25"
         },
         {
             "name": "doctrine/lexer",
@@ -245,12 +245,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
-                "reference": "d8305ac8a618676e18c8c4dc8ef868df7374cfb3"
+                "reference": "520d9e97054214db88ea20502ee774b3dd22421e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/d8305ac8a618676e18c8c4dc8ef868df7374cfb3",
-                "reference": "d8305ac8a618676e18c8c4dc8ef868df7374cfb3",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/520d9e97054214db88ea20502ee774b3dd22421e",
+                "reference": "520d9e97054214db88ea20502ee774b3dd22421e",
                 "shasum": ""
             },
             "require": {
@@ -293,7 +293,7 @@
                 "orm",
                 "sql"
             ],
-            "time": "2014-10-04 18:45:44"
+            "time": "2014-10-16 14:32:18"
         },
         {
             "name": "illuminate/events",
@@ -392,12 +392,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/lucifurious/kisma.git",
-                "reference": "eea48a0189839a3e7b878b802d1837b4ea9d5241"
+                "reference": "7e8ab8b6d9c6b686a8a71d31eae3e222b73f7c20"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lucifurious/kisma/zipball/eea48a0189839a3e7b878b802d1837b4ea9d5241",
-                "reference": "eea48a0189839a3e7b878b802d1837b4ea9d5241",
+                "url": "https://api.github.com/repos/lucifurious/kisma/zipball/7e8ab8b6d9c6b686a8a71d31eae3e222b73f7c20",
+                "reference": "7e8ab8b6d9c6b686a8a71d31eae3e222b73f7c20",
                 "shasum": ""
             },
             "require": {
@@ -408,7 +408,7 @@
                 "symfony/http-foundation": "~2.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "~3.7"
+                "phpunit/phpunit": "@stable"
             },
             "type": "library",
             "extra": {
@@ -442,7 +442,7 @@
                 "php5",
                 "utility"
             ],
-            "time": "2014-10-05 22:12:45"
+            "time": "2014-10-21 22:02:12"
         },
         {
             "name": "monolog/monolog",
@@ -450,12 +450,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "940cbe15abe36924e5693abb585215bb322686a7"
+                "reference": "d0a9acbad0643726453e901d9d49c14e13de9f86"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/940cbe15abe36924e5693abb585215bb322686a7",
-                "reference": "940cbe15abe36924e5693abb585215bb322686a7",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/d0a9acbad0643726453e901d9d49c14e13de9f86",
+                "reference": "d0a9acbad0643726453e901d9d49c14e13de9f86",
                 "shasum": ""
             },
             "require": {
@@ -514,7 +514,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2014-10-04 15:43:06"
+            "time": "2014-10-21 20:10:18"
         },
         {
             "name": "nesbot/carbon",
@@ -935,12 +935,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/FrameworkBundle.git",
-                "reference": "7d0dde82483e29ff975f9f7aa38838ee451224b8"
+                "reference": "14a6f395872717a9f4b1306b7c0546c8f9fe0106"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/FrameworkBundle/zipball/7d0dde82483e29ff975f9f7aa38838ee451224b8",
-                "reference": "7d0dde82483e29ff975f9f7aa38838ee451224b8",
+                "url": "https://api.github.com/repos/symfony/FrameworkBundle/zipball/14a6f395872717a9f4b1306b7c0546c8f9fe0106",
+                "reference": "14a6f395872717a9f4b1306b7c0546c8f9fe0106",
                 "shasum": ""
             },
             "require": {
@@ -1006,7 +1006,7 @@
             ],
             "description": "Symfony FrameworkBundle",
             "homepage": "http://symfony.com",
-            "time": "2014-10-06 13:17:46"
+            "time": "2014-10-18 19:00:49"
         },
         {
             "name": "symfony/http-foundation",
@@ -1068,12 +1068,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/HttpKernel.git",
-                "reference": "a32e518e25bb435a5ef18bec76d4942b4cbb98e6"
+                "reference": "2ef12792ed45e19e614049e1f76d7dd1ed803e53"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/HttpKernel/zipball/a32e518e25bb435a5ef18bec76d4942b4cbb98e6",
-                "reference": "a32e518e25bb435a5ef18bec76d4942b4cbb98e6",
+                "url": "https://api.github.com/repos/symfony/HttpKernel/zipball/2ef12792ed45e19e614049e1f76d7dd1ed803e53",
+                "reference": "2ef12792ed45e19e614049e1f76d7dd1ed803e53",
                 "shasum": ""
             },
             "require": {
@@ -1134,7 +1134,7 @@
             ],
             "description": "Symfony HttpKernel Component",
             "homepage": "http://symfony.com",
-            "time": "2014-10-06 12:52:17"
+            "time": "2014-10-20 19:11:43"
         },
         {
             "name": "symfony/routing",
@@ -1143,12 +1143,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Routing.git",
-                "reference": "11ed40b4b85222865ac4d01d0f64696d42f32fd9"
+                "reference": "6e43bd277f1f7e181a65b85813312f428e4926ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Routing/zipball/11ed40b4b85222865ac4d01d0f64696d42f32fd9",
-                "reference": "11ed40b4b85222865ac4d01d0f64696d42f32fd9",
+                "url": "https://api.github.com/repos/symfony/Routing/zipball/6e43bd277f1f7e181a65b85813312f428e4926ab",
+                "reference": "6e43bd277f1f7e181a65b85813312f428e4926ab",
                 "shasum": ""
             },
             "require": {
@@ -1201,7 +1201,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2014-10-07 14:17:15"
+            "time": "2014-10-09 16:12:58"
         },
         {
             "name": "symfony/security-core",
@@ -1210,12 +1210,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/security-core.git",
-                "reference": "cd35c9337766e0f0f14f2968371e1922d93ea880"
+                "reference": "e9030aec262e7d697e2f66d7f47db6164cc360c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/security-core/zipball/cd35c9337766e0f0f14f2968371e1922d93ea880",
-                "reference": "cd35c9337766e0f0f14f2968371e1922d93ea880",
+                "url": "https://api.github.com/repos/symfony/security-core/zipball/e9030aec262e7d697e2f66d7f47db6164cc360c0",
+                "reference": "e9030aec262e7d697e2f66d7f47db6164cc360c0",
                 "shasum": ""
             },
             "require": {
@@ -1263,7 +1263,7 @@
             ],
             "description": "Symfony Security Component - Core Library",
             "homepage": "http://symfony.com",
-            "time": "2014-09-29 07:38:25"
+            "time": "2014-10-10 16:59:52"
         },
         {
             "name": "symfony/security-csrf",
@@ -1733,12 +1733,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "ae6cefd7cc84586a5ef27e04bae11ee940ec63dc"
+                "reference": "38709dc22d519a3d1be46849868aa2ddf822bcf6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ae6cefd7cc84586a5ef27e04bae11ee940ec63dc",
-                "reference": "ae6cefd7cc84586a5ef27e04bae11ee940ec63dc",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/38709dc22d519a3d1be46849868aa2ddf822bcf6",
+                "reference": "38709dc22d519a3d1be46849868aa2ddf822bcf6",
                 "shasum": ""
             },
             "require": {
@@ -1798,7 +1798,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2014-04-30 12:24:19"
+            "time": "2014-10-17 09:04:17"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
