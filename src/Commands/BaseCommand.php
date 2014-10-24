@@ -86,10 +86,12 @@ class BaseCommand extends ContainerAwareCommand
      */
     public function write( $messages, $newline = false, $type = OutputInterface::OUTPUT_NORMAL )
     {
-        return $this
+        $this
             ->clearArea( 'line' )
             ->_output
             ->write( $this->_stampMessages( $messages ), $newline, $type );
+
+        return $this;
     }
 
     /**
@@ -104,7 +106,8 @@ class BaseCommand extends ContainerAwareCommand
      */
     public function writeCode( $code, $value1 = 1, $value2 = 1 )
     {
-        return $this->_output->write( AnsiCodes::render( $code, $value1, $value2 ) );
+        $this->_output->write( AnsiCodes::render( $code, $value1, $value2 ) );
+        return $this;
     }
 
     /**
