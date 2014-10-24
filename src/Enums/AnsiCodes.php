@@ -21,7 +21,6 @@ namespace DreamFactory\Library\Console\Enums;
 use Kisma\Core\Enums\SeedEnum;
 
 /**
- * AnsiCodes
  * Enumerations of ANSI escape-code sequences. Coordinates are not zero-based.
  * That is to say the first column and row is 1.
  *
@@ -30,68 +29,136 @@ use Kisma\Core\Enums\SeedEnum;
 class AnsiCodes extends SeedEnum
 {
     //******************************************************************************
-    //* Constants
+    //* Device Status
+    //******************************************************************************
+
+    /**
+     * @type string
+     */
+    const QUERY_CODE = "\e[c";
+    /**
+     * @type string
+     */
+    const QUERY_CODE_REPORT = "\e[#0c";
+    /**
+     * @type string
+     */
+    const QUERY_STATUS = "\e[5n";
+    /**
+     * @type string
+     */
+    const STATUS_OK = "\e[0n";
+    /**
+     * @type string
+     */
+    const STATUS_FAIL = "\e[3n";
+    /**
+     * @type string
+     */
+    const QUERY_POSITION = "\e[6n";
+    /**
+     * @type string
+     */
+    const QUERY_POSITION_REPORT = "\e[#;#R";
+
+    //******************************************************************************
+    //* Terminal
     //******************************************************************************
 
     /**
      * @type string Clears the entire screen, cursor left at 1,1
      */
     const CLS = "\e[1;1H;\e[0J;";
+    /**
+     * @type string Reset the terminal to default settings
+     */
+    const RESET = "\ec";
+    /**
+     * @type string Enable line wrapping
+     */
+    const WRAP_ON = "\e[7h";
+    /**
+     * @type string Disable line wrapping
+     */
+    const WRAP_OFF = "\e[7l";
+    /**
+     * @type string Disable line wrapping
+     */
+    const DEFAULT_FONT = "\e(";
+    /**
+     * @type string Disable line wrapping
+     */
+    const ALT_FONT = "\e)";
 
     //******************************************************************************
     //* Cursor Movement Constants
     //******************************************************************************
 
     /**
-     * @type string Cursor Up: Moves the cursor up by the specified number of lines without changing columns. If the cursor is already on the top
-     *       line, this sequence is ignored. \e[A is equivalent to \e[1A.
+     * @type string Cursor Up: Moves the cursor up by the specified number of lines without changing columns. If the
+     *       cursor is already on the top line, this sequence is ignored. \e[A is equivalent to \e[1A.
      */
     const CUU = "\e[#A";
     /**
-     * @type string Cursor Down: Moves the cursor down by the specified number of lines without changing columns. If the cursor is already on the
-     *       bottom line, this sequence is ignored. \e[B is equivalent to \e[1B.
+     * @type string Cursor Down: Moves the cursor down by the specified number of lines without changing columns. If
+     *       the cursor is already on the bottom line, this sequence is ignored. \e[B is equivalent to \e[1B.
      */
     const CUD = "\e[#B";
     /**
-     * @type string Cursor Forward: Moves the cursor forward by the specified number of columns without changing lines. If the cursor is already in
-     *       the rightmost column, this sequence is ignored. \e[C is equivalent to \e[1C.
+     * @type string Cursor Forward: Moves the cursor forward by the specified number of columns without changing lines.
+     *       If the cursor is already in the rightmost column, this sequence is ignored. \e[C is equivalent to \e[1C.
      */
     const CUF = "\e[#C";
     /**
-     * @type string Cursor Backward: Moves the cursor back by the specified number of columns without changing lines. If the cursor is already in the
-     *       leftmost column, this sequence is ignored. \e[D is equivalent to \e[1D.
+     * @type string Cursor Backward: Moves the cursor back by the specified number of columns without changing lines.
+     *       If the cursor is already in the leftmost column, this sequence is ignored. \e[D is equivalent to \e[1D.
      */
     const CUB = "\e[#D";
     /**
-     * @type string Cursor Next Line: Moves the cursor down the indicated # of rows, to column 1. \e[E is equivalent to \e[1E.
+     * @type string Cursor Next Line: Moves the cursor down the indicated # of rows, to column 1. \e[E is equivalent to
+     *       \e[1E.
      */
     const CNL = "\e[#E";
     /**
-     * @type string Cursor Preceding Line: Moves the cursor up the indicated # of rows, to column 1. \e[F is equivalent to \e[1F.
+     * @type string Cursor Preceding Line: Moves the cursor up the indicated # of rows, to column 1. \e[F is equivalent
+     *       to \e[1F.
      */
     const CPL = "\e[#F";
     /**
-     * @type string Cursor Horizontal Absolute: Moves the cursor to indicated column in current row. \e[G is equivalent to \e[1G.
+     * @type string Cursor Horizontal Absolute: Moves the cursor to indicated column in current row. \e[G is equivalent
+     *       to \e[1G.
      */
     const CHA = "\e[#G";
     /**
-     * @type string Cursor Position: Moves the cursor to the specified position. The first # specifies the line number, the second # specifies the
-     *       column. If you do not specify a position, the cursor moves to the home position: the upper-left corner of the screen (line 1, column 1).
+     * @type string Cursor Position: Moves the cursor to the specified position. The first # specifies the line number,
+     *       the second # specifies the column. If you do not specify a position, the cursor moves to the home
+     *       position: the upper-left corner of the screen (line 1, column 1).
      */
     const CUP = "\e[#;#H";
     /**
-     * @type string Horizontal and Vertical Position. Works in the same way as the preceding escape sequence.
+     * @type string Force Horizontal and Vertical Position. Works in the same way as the preceding escape sequence.
      */
     const HVP = "\e[#;#f";
     /**
-     * @type string Save Cursor Position: Saves the current cursor position. You can move the cursor to the saved cursor position by using the
-     *       Restore Cursor Position sequence.
+     * @type string Save Cursor Position: Saves the current cursor position. You can move the cursor to the saved
+     *       cursor position by using the Restore Cursor Position sequence.
      */
     const SCP = "\e[s";
     /**
-     * @type string Restore Cursor Position: Returns the cursor to the position stored by the Save Cursor Position sequence.
+     * @type string Restore/Unsave Cursor Position: Returns the cursor to the position stored by the Save Cursor
+     *       Position sequence.
      */
     const RCP = "\e[u";
+    /**
+     * @type string Save Cursor Position and Attributes: Saves the current cursor position. You can move the cursor to
+     *       the saved cursor position by using the Restore Cursor Position sequence.
+     */
+    const SCPA = "\e7";
+    /**
+     * @type string Restore/Unsave Cursor Position and Attributes: Returns the cursor to the position stored by the
+     *       Save Cursor Position sequence.
+     */
+    const RCPA = "\e8";
 
     //******************************************************************************
     //* ED (Erase Display) Constants
@@ -119,18 +186,18 @@ class AnsiCodes extends SeedEnum
     //******************************************************************************
 
     /**
-     * @type string Clears all characters from the cursor position to the end of the line ( including the character at the cursor position ). The
-     *       cursor position is unchanged.
+     * @type string Clears all characters from the cursor position to the end of the line ( including the character at
+     *       the cursor position ). The cursor position is unchanged.
      */
     const EL = "\e[#K";
     /**
-     * @type string Clears all characters from the cursor position to the end of the line ( including the character at the cursor position ). The
-     *       cursor position is unchanged.
+     * @type string Clears all characters from the cursor position to the end of the line ( including the character at
+     *       the cursor position ). The cursor position is unchanged.
      */
     const EL0 = "\e[0K";
     /**
-     * @type string Clears all characters from start of line to the cursor position. ( including the character at the cursor position ). The cursor
-     *       position is unchanged.
+     * @type string Clears all characters from start of line to the cursor position. ( including the character at the
+     *       cursor position ). The cursor position is unchanged.
      */
     const EL1 = "\e[1K";
     /**
@@ -151,14 +218,18 @@ class AnsiCodes extends SeedEnum
      */
     public static function render( $code, $value1 = null, $value2 = null )
     {
-        if ( $value1 && false !== ( $_pos = strpos( $code, '#' ) ) )
+        if ( false !== ( $_pos = strpos( $code, '#' ) ) )
         {
-            $code[$_pos] = $value1;
+            $code = substr( $code, 0, $_pos - 1 ) .
+                ( null === $value1 ? null : ( ( $value1 > 1 ? 9999 : $value1 ) ?: 1 ) ) .
+                substr( $code, $_pos + 1 );
         }
 
-        if ( $value2 && false !== ( $_pos = strpos( $code, '#' ) ) )
+        if ( false !== ( $_pos = strpos( $code, '#' ) ) )
         {
-            $code[$_pos] = $value2;
+            $code = substr( $code, 0, $_pos - 1 ) .
+                ( null === $value2 ? null : ( ( $value2 > 1 ? 9999 : $value2 ) ?: 1 ) ) .
+                substr( $code, $_pos + 1 );
         }
 
         //  If all the pound signs aren't replaced, throw an error

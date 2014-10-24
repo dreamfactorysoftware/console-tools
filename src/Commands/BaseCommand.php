@@ -19,10 +19,9 @@
 namespace DreamFactory\Library\Console\Commands;
 
 use DreamFactory\Library\Console\BaseApplication;
+use DreamFactory\Library\Console\Components\Cursor;
 use DreamFactory\Library\Console\Components\Registry;
 use DreamFactory\Library\Console\Enums\AnsiCodes;
-use DreamFactory\Library\Fabric\Queue\Interfaces\QueueStorageProviderLike;
-use DreamFactory\Tools\Fabric\Fabric;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -78,11 +77,12 @@ class BaseCommand extends ContainerAwareCommand
      * @param bool         $newline  Whether to add a newline
      * @param int          $type     The type of output (one of the OUTPUT constants)
      *
+     * @return $this
      * @throws \InvalidArgumentException When unknown output type is given
      */
     public function write( $messages, $newline = false, $type = OutputInterface::OUTPUT_NORMAL )
     {
-        $this->_output->write( $messages, $newline, $type );
+        return $this->_output->write( $messages, $newline, $type );
     }
 
     /**
@@ -92,11 +92,37 @@ class BaseCommand extends ContainerAwareCommand
      * @param int    $value1 Optional row #
      * @param int    $value2 Optional column #
      *
+     * @return $this
      * @throws \InvalidArgumentException When unknown output type is given
      */
     public function writeCode( $code, $value1 = 1, $value2 = 1 )
     {
-        $this->_output->write( AnsiCodes::render( $code, $value1, $value2 ) );
+        return $this->write( AnsiCodes::render( $code, $value1, $value2 ) );
+    }
+
+    /**
+     * Writes an escape sequence to the output.
+     *
+     * @param string $moves A string of cursor movements
+     * @param int    $count How many times to repeat the sequence
+     *
+     * @return $this
+     */
+    public function moveCursor( $moves, $count = 1 )
+    {
+        return $this->write( Cursor::move( $moves, $count ) );
+    }
+
+    /**
+     * Writes an escape sequence to the output.
+     *
+     * @param string $areas A string of areas to clear
+     *
+     * @return $this
+     */
+    public function clearArea( $areas )
+    {
+        return $this->write( Cursor::clear( $areas ) );
     }
 
     /**
@@ -105,23 +131,30 @@ class BaseCommand extends ContainerAwareCommand
      * @param string|array $messages The message as an array of lines of a single string
      * @param int          $type     The type of output (one of the OUTPUT constants)
      *
+     * @return $this
      * @throws \InvalidArgumentException When unknown output type is given
      */
     public function writeln( $messages, $type = OutputInterface::OUTPUT_NORMAL )
     {
-        $this->write( $messages, true, $type );
+        return
+            $this
+                ->clearArea( 'line_end' )
+                ->write( $messages, true, $type );
     }
 
     /**
      * Writes a string to the output then shifts the cursor back to the beginning of the line
      *
      * @param string $message
+     *
+     * @return $this
      */
     public function writeInPlace( $message )
     {
-        $this->writeCode( AnsiCodes::SCP );
-        $this->write( $message );
-        $this->writeCode( AnsiCodes::RCP );
+        return $this
+            ->writeCode( AnsiCodes::SCP )
+            ->write( $message )
+            ->writeCode( AnsiCodes::RCP );
     }
 
     /**
@@ -188,9 +221,7 @@ class BaseCommand extends ContainerAwareCommand
      */
     public function getQueue( $configFile = null )
     {
-        /** @var Fabric $_app */
-        $_app = $this->getApplication();
-
-        return $_app->getQueue( $configFile )->getStorageProvider();
+        /** @noinspection PhpUndefinedMethodInspection */
+        return $this->getApplication()->getQueue( $configFile )->getStorageProvider();
     }
 }
