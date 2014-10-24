@@ -86,32 +86,10 @@ class BaseCommand extends ContainerAwareCommand
      */
     public function write( $messages, $newline = false, $type = OutputInterface::OUTPUT_NORMAL )
     {
-        if ( $this->_elapsedTimer )
-        {
-            if ( empty( $this->_startTime ) )
-            {
-                $this->_startTime = microtime( true );
-            }
-
-            $_span = sprintf( '%02.08f', microtime( true ) - $this->_startTime );
-
-            if ( is_array( $messages ) )
-            {
-                foreach ( $messages as $_index => $_message )
-                {
-                    $messages[$_index] = '[' . $_span . '] ' . $_message;
-                }
-            }
-            else
-            {
-                $messages = '[' . $_span . '] ' . $messages;
-            }
-        }
-
         return $this
             ->clearArea( 'line' )
             ->_output
-            ->write( $messages, $newline, $type );
+            ->write( $this->_stampMessages( $messages ), $newline, $type );
     }
 
     /**
@@ -126,7 +104,7 @@ class BaseCommand extends ContainerAwareCommand
      */
     public function writeCode( $code, $value1 = 1, $value2 = 1 )
     {
-        return $this->write( AnsiCodes::render( $code, $value1, $value2 ) );
+        return $this->_output->write( AnsiCodes::render( $code, $value1, $value2 ) );
     }
 
     /**
@@ -139,7 +117,9 @@ class BaseCommand extends ContainerAwareCommand
      */
     public function moveCursor( $moves, $count = 1 )
     {
-        return $this->write( Cursor::move( $moves, $count ) );
+        $this->_output->write( Cursor::move( $moves, $count ) );
+
+        return $this;
     }
 
     /**
@@ -151,7 +131,9 @@ class BaseCommand extends ContainerAwareCommand
      */
     public function clearArea( $areas )
     {
-        return $this->write( Cursor::clear( $areas ) );
+        $this->_output->write( Cursor::clear( $areas ) );
+
+        return $this;
     }
 
     /**
@@ -187,6 +169,38 @@ class BaseCommand extends ContainerAwareCommand
     }
 
     /**
+     * @param string|array $messages One or more messages to timestamp
+     *
+     * @return array|string
+     */
+    protected function _stampMessages( $messages )
+    {
+        if ( $this->_elapsedTimer )
+        {
+            if ( empty( $this->_startTime ) )
+            {
+                $this->_startTime = microtime( true );
+            }
+
+            $_span = $this->_elapsed( true );
+
+            if ( is_array( $messages ) )
+            {
+                foreach ( $messages as $_index => $_message )
+                {
+                    $messages[$_index] = '[' . $_span . '] ' . $_message;
+                }
+            }
+            else
+            {
+                $messages = '[' . $_span . '] ' . $messages;
+            }
+        }
+
+        return $messages;
+    }
+
+    /**
      * @param InputInterface  $input
      * @param OutputInterface $output
      */
@@ -202,11 +216,15 @@ class BaseCommand extends ContainerAwareCommand
     }
 
     /**
+     * @param bool $formatted If true, result is formatted
+     *
      * @return float The elapsed time since the start of execution
      */
-    protected function _elapsed()
+    protected function _elapsed( $formatted = false )
     {
-        return microtime( true ) - $this->_startTime;
+        $_elapsed = microtime( true ) - $this->_startTime;
+
+        return $formatted ? sprintf( "%08.08f", $_elapsed ) : $_elapsed;
     }
 
     /**
