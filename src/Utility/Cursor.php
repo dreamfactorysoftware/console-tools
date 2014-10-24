@@ -1,5 +1,5 @@
 <?php
-namespace DreamFactory\Library\Console\Components;
+namespace DreamFactory\Library\Console\Utility;
 
 use DreamFactory\Library\Console\Enums\AnsiCodes;
 
