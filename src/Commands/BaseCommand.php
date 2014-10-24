@@ -47,6 +47,10 @@ class BaseCommand extends ContainerAwareCommand
      * @type float
      */
     protected $_startTime;
+    /**
+     * @type bool If true, an elapsed timer will be displayed
+     */
+    protected $_elapsedTimer = false;
 
     //******************************************************************************
     //* Methods
@@ -82,7 +86,32 @@ class BaseCommand extends ContainerAwareCommand
      */
     public function write( $messages, $newline = false, $type = OutputInterface::OUTPUT_NORMAL )
     {
-        return $this->_output->write( $messages, $newline, $type );
+        if ( $this->_elapsedTimer )
+        {
+            if ( empty( $this->_startTime ) )
+            {
+                $this->_startTime = microtime( true );
+            }
+
+            $_span = sprintf( '%02.08f', microtime( true ) - $this->_startTime );
+
+            if ( is_array( $messages ) )
+            {
+                foreach ( $messages as $_index => $_message )
+                {
+                    $messages[$_index] = '[' . $_span . '] ' . $_message;
+                }
+            }
+            else
+            {
+                $messages = '[' . $_span . '] ' . $messages;
+            }
+        }
+
+        return $this
+            ->clearArea( 'line' )
+            ->_output
+            ->write( $messages, $newline, $type );
     }
 
     /**
@@ -212,16 +241,59 @@ class BaseCommand extends ContainerAwareCommand
         return $this->_output;
     }
 
+    /** @noinspection PhpUndefinedClassInspection */
+    /** @noinspection PhpUndefinedNamespaceInspection */
     /**
      * Gets the work queue
      *
      * @param null|string|array $configFile Either /path/to/config/file or array of config parameters or nada
      *
-     * @return QueueStorageProviderLike
+     * @return mixed
      */
     public function getQueue( $configFile = null )
     {
         /** @noinspection PhpUndefinedMethodInspection */
         return $this->getApplication()->getQueue( $configFile )->getStorageProvider();
     }
+
+    /**
+     * @return boolean
+     */
+    public function getElapsedTimer()
+    {
+        return $this->_elapsedTimer;
+    }
+
+    /**
+     * @param boolean $elapsedTimer
+     *
+     * @return BaseCommand
+     */
+    public function setElapsedTimer( $elapsedTimer )
+    {
+        $this->_elapsedTimer = $elapsedTimer;
+
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getStartTime()
+    {
+        return $this->_startTime;
+    }
+
+    /**
+     * @param float $startTime
+     *
+     * @return BaseCommand
+     */
+    public function setStartTime( $startTime )
+    {
+        $this->_startTime = $startTime;
+
+        return $this;
+    }
+
 }
