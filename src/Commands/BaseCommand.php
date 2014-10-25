@@ -32,6 +32,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 class BaseCommand extends ContainerAwareCommand
 {
     //******************************************************************************
+    //* Constants
+    //******************************************************************************
+
+    /**
+     * @type string The format for timestamp message spans
+     */
+    const DEFAULT_SPAN_FORMAT = "%' 10.04f";
+
+    //******************************************************************************
     //* Members
     //******************************************************************************
 
@@ -107,6 +116,7 @@ class BaseCommand extends ContainerAwareCommand
     public function writeCode( $code, $value1 = 1, $value2 = 1 )
     {
         $this->_output->write( AnsiCodes::render( $code, $value1, $value2 ) );
+
         return $this;
     }
 
@@ -227,7 +237,7 @@ class BaseCommand extends ContainerAwareCommand
     {
         $_elapsed = microtime( true ) - $this->_startTime;
 
-        return $formatted ? sprintf( "%08.08f", $_elapsed ) : $_elapsed;
+        return $formatted ? sprintf( static::DEFAULT_SPAN_FORMAT, $_elapsed ) : $_elapsed;
     }
 
     /**
