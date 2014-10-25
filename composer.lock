@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "7fdc34116da16e176e6de6c658731b5d",
+    "hash": "ee7cbef667bfffbd7b23d12f9c956176",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -196,6 +196,57 @@
                 "parser"
             ],
             "time": "2014-09-09 13:34:57"
+        },
+        {
+            "name": "dreamfactory/php-utils",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dreamfactorysoftware/php-utils.git",
+                "reference": "25c75d6277465fad419ee7180cc5780956ca626a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dreamfactorysoftware/php-utils/zipball/25c75d6277465fad419ee7180cc5780956ca626a",
+                "reference": "25c75d6277465fad419ee7180cc5780956ca626a",
+                "shasum": ""
+            },
+            "require": {
+                "kisma/kisma": "*",
+                "php": "~5.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-develop": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DreamFactory\\Library\\Utility\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Jerry Ablan",
+                    "email": "jerryablan@dreamfactory.com"
+                }
+            ],
+            "description": "A library of helper classes for PHP",
+            "homepage": "https://www.dreamfactory.com/",
+            "keywords": [
+                "console",
+                "dreamfactory",
+                "utility"
+            ],
+            "time": "2014-10-22 18:09:40"
         },
         {
             "name": "illuminate/container",
@@ -392,12 +443,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/lucifurious/kisma.git",
-                "reference": "7e8ab8b6d9c6b686a8a71d31eae3e222b73f7c20"
+                "reference": "ee40eb80fe453077398fe3e2b9dacdedfbba06a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lucifurious/kisma/zipball/7e8ab8b6d9c6b686a8a71d31eae3e222b73f7c20",
-                "reference": "7e8ab8b6d9c6b686a8a71d31eae3e222b73f7c20",
+                "url": "https://api.github.com/repos/lucifurious/kisma/zipball/ee40eb80fe453077398fe3e2b9dacdedfbba06a9",
+                "reference": "ee40eb80fe453077398fe3e2b9dacdedfbba06a9",
                 "shasum": ""
             },
             "require": {
@@ -442,7 +493,7 @@
                 "php5",
                 "utility"
             ],
-            "time": "2014-10-21 22:02:12"
+            "time": "2014-10-23 00:22:25"
         },
         {
             "name": "monolog/monolog",
@@ -717,12 +768,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Debug.git",
-                "reference": "a8b043dd0a8e5bab056f484b1aa73cfa53845e9f"
+                "reference": "88964f90eb1a9f67e0237ae80603ad4696a8e67d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Debug/zipball/a8b043dd0a8e5bab056f484b1aa73cfa53845e9f",
-                "reference": "a8b043dd0a8e5bab056f484b1aa73cfa53845e9f",
+                "url": "https://api.github.com/repos/symfony/Debug/zipball/88964f90eb1a9f67e0237ae80603ad4696a8e67d",
+                "reference": "88964f90eb1a9f67e0237ae80603ad4696a8e67d",
                 "shasum": ""
             },
             "require": {
@@ -764,7 +815,7 @@
             ],
             "description": "Symfony Debug Component",
             "homepage": "http://symfony.com",
-            "time": "2014-10-02 09:12:20"
+            "time": "2014-10-24 05:51:19"
         },
         {
             "name": "symfony/dependency-injection",
@@ -935,12 +986,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/FrameworkBundle.git",
-                "reference": "14a6f395872717a9f4b1306b7c0546c8f9fe0106"
+                "reference": "b00f297ee7977d56db33a7ab2538015be5af1dd3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/FrameworkBundle/zipball/14a6f395872717a9f4b1306b7c0546c8f9fe0106",
-                "reference": "14a6f395872717a9f4b1306b7c0546c8f9fe0106",
+                "url": "https://api.github.com/repos/symfony/FrameworkBundle/zipball/b00f297ee7977d56db33a7ab2538015be5af1dd3",
+                "reference": "b00f297ee7977d56db33a7ab2538015be5af1dd3",
                 "shasum": ""
             },
             "require": {
@@ -1006,7 +1057,7 @@
             ],
             "description": "Symfony FrameworkBundle",
             "homepage": "http://symfony.com",
-            "time": "2014-10-18 19:00:49"
+            "time": "2014-10-24 05:51:19"
         },
         {
             "name": "symfony/http-foundation",
@@ -1015,12 +1066,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/HttpFoundation.git",
-                "reference": "c24942a7ec2d8409d1f60d02c4460ca8317e885a"
+                "reference": "60555860e924e33aa09643b87b98ec31886acfa3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/c24942a7ec2d8409d1f60d02c4460ca8317e885a",
-                "reference": "c24942a7ec2d8409d1f60d02c4460ca8317e885a",
+                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/60555860e924e33aa09643b87b98ec31886acfa3",
+                "reference": "60555860e924e33aa09643b87b98ec31886acfa3",
                 "shasum": ""
             },
             "require": {
@@ -1059,7 +1110,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "http://symfony.com",
-            "time": "2014-10-07 14:06:18"
+            "time": "2014-10-24 05:51:19"
         },
         {
             "name": "symfony/http-kernel",
@@ -1143,12 +1194,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Routing.git",
-                "reference": "6e43bd277f1f7e181a65b85813312f428e4926ab"
+                "reference": "1132b255dea5aab847fa635225888863f4ec184a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Routing/zipball/6e43bd277f1f7e181a65b85813312f428e4926ab",
-                "reference": "6e43bd277f1f7e181a65b85813312f428e4926ab",
+                "url": "https://api.github.com/repos/symfony/Routing/zipball/1132b255dea5aab847fa635225888863f4ec184a",
+                "reference": "1132b255dea5aab847fa635225888863f4ec184a",
                 "shasum": ""
             },
             "require": {
@@ -1201,7 +1252,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2014-10-09 16:12:58"
+            "time": "2014-10-24 05:51:19"
         },
         {
             "name": "symfony/security-core",
