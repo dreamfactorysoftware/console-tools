@@ -272,8 +272,6 @@ class BaseCommand extends ContainerAwareCommand
         return $this->_output;
     }
 
-    /** @noinspection PhpUndefinedClassInspection */
-    /** @noinspection PhpUndefinedNamespaceInspection */
     /**
      * Gets the work queue
      *
@@ -284,7 +282,15 @@ class BaseCommand extends ContainerAwareCommand
     public function getQueue( $configFile = null )
     {
         /** @noinspection PhpUndefinedMethodInspection */
-        return $this->getApplication()->getQueue( $configFile )->getStorageProvider();
+        $_queue = $this->getApplication()->getQueue( $configFile );
+
+        if ( !empty( $_queue ) )
+        {
+            /** @noinspection PhpUndefinedMethodInspection */
+            return $_queue->getStorageProvider();
+        }
+
+        return false;
     }
 
     /**
