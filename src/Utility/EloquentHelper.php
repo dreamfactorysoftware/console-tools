@@ -18,7 +18,6 @@
  */
 namespace DreamFactory\Library\Console\Utility;
 
-use DreamFactory\Tools\Fabric\Exceptions\FabricException;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 /**
@@ -73,7 +72,6 @@ class EloquentHelper
      * @param string $path
      * @param string $pattern
      *
-     * @throws FabricException
      * @return bool True if files were autoloaded
      */
     public static function autoload( $path, $pattern = self::DEFAULT_CONFIG_PATTERN )
@@ -106,7 +104,7 @@ class EloquentHelper
 
         if ( !$_found )
         {
-            throw new FabricException( 'No database configuration found.' );
+            throw new \RuntimeException( 'No database configuration found.' );
         }
 
         return $_found;
@@ -122,12 +120,7 @@ class EloquentHelper
      */
     public static function addConnection( array $config = array(), $name = null )
     {
-        if ( null === static::$_capsule )
-        {
-            static::$_capsule = new Capsule();
-        }
-
-        static::$_capsule->addConnection( $config, $name );
+        static::getCapsule()->addConnection( $config, $name );
     }
 
     /**
@@ -135,7 +128,7 @@ class EloquentHelper
      */
     public static function getCapsule()
     {
-        return static::$_capsule;
+        return static::$_capsule ?: static::$_capsule = new Capsule();
     }
 
     /**
@@ -147,10 +140,10 @@ class EloquentHelper
     {
         if ( $asGlobal )
         {
-            static::$_capsule->setAsGlobal();
+            static::getCapsule()->setAsGlobal();
         }
 
-        static::$_capsule->bootEloquent();
+        static::getCapsule()->bootEloquent();
     }
 
     /**
