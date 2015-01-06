@@ -1,8 +1,6 @@
 <?php
 namespace DreamFactory\Library\Console\Components;
 
-use Kisma\Core\Exceptions\OverwriteException;
-
 /**
  * A generic KVP collection
  */
@@ -93,14 +91,13 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      * @param mixed  $value Value to set
      * @param bool   $overwrite
      *
-     * @throws OverwriteException
      * @return Collection Returns a reference to the object
      */
     public function set( $key, $value, $overwrite = true )
     {
         if ( !$overwrite && array_key_exists( $key, $this->_contents ) )
         {
-            throw new OverwriteException( 'Key "' . $key . '" is read-only.' );
+            throw new \LogicException( 'Key "' . $key . '" is read-only.' );
         }
 
         $this->_contents[$key] = $value;

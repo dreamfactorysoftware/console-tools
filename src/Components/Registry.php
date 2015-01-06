@@ -20,7 +20,7 @@ namespace DreamFactory\Library\Console\Components;
 
 use DreamFactory\Library\Console\Interfaces\NodeLike;
 use DreamFactory\Library\Console\Interfaces\RegistryLike;
-use Kisma\Core\Exceptions\FileSystemException;
+use DreamFactory\Library\Utility\Exceptions\FileSystemException;
 
 /**
  * Manages a JSON registry

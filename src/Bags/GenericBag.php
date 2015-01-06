@@ -19,7 +19,6 @@
 namespace DreamFactory\Library\Console\Bags;
 
 use DreamFactory\Library\Console\Interfaces\NodeLike;
-use Kisma\Core\Exceptions\OverwriteException;
 
 /**
  * Super simple generic array/bag. API modeled after the many Symfony2 bags
@@ -184,7 +183,6 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      * @param mixed  $value     The value to set
      * @param bool   $overwrite Whether to overwrite existing data. Defaults to true
      *
-     * @throws OverwriteException
      * @return $this
      */
     public function set( $key, $value, $overwrite = true )

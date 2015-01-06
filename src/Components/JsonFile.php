@@ -18,7 +18,7 @@
  */
 namespace DreamFactory\Library\Console\Components;
 
-use Kisma\Core\Exceptions\FileSystemException;
+use DreamFactory\Library\Utility\Exceptions\FileSystemException;
 
 /**
  * Reads/writes a json file
@@ -64,8 +64,6 @@ class JsonFile
      *
      * @param string       $filePath        The absolute path of the file, including the name.
      * @param array|object $defaultContents The contents to write to the file if being created
-     *
-     * @throws FileSystemException
      */
     public function __construct( $filePath = null, $defaultContents = null )
     {
@@ -75,7 +73,6 @@ class JsonFile
     /**
      * Checks whether json file exists.
      *
-     * @throws FileSystemException
      * @return bool
      */
     public function exists()
