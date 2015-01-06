@@ -20,7 +20,6 @@ namespace DreamFactory\Library\Console\Commands;
 
 use DreamFactory\Library\Console\BaseApplication;
 use DreamFactory\Library\Console\Components\Registry;
-use DreamFactory\Library\Console\Enums\AnsiCodes;
 use DreamFactory\Library\Console\Utility\Cursor;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
