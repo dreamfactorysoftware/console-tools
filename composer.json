@@ -12,7 +12,7 @@
     ],
     "minimum-stability": "dev",
     "require":           {
-        "illuminate/database":      "~5.0.0",
+        "illuminate/database":      "5.1.*",
         "symfony/console":          "~2.4",
         "symfony/framework-bundle": "~2.4",
         "dreamfactory/php-utils":   "*"
