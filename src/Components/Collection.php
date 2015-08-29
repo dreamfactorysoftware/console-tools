@@ -1,5 +1,6 @@
-<?php
-namespace DreamFactory\Library\Console\Components;
+<?php namespace DreamFactory\Library\Console\Components;
+
+use DreamFactory\Library\Utility\JsonFile;
 
 /**
  * A generic KVP collection
@@ -22,7 +23,7 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
     /**
      * @param array $contents Initial contents of the collection
      */
-    public function __construct( array $contents = array() )
+    public function __construct(array $contents = [])
     {
         $this->_contents = $contents;
     }
@@ -32,7 +33,7 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function clear()
     {
-        $this->_contents = array();
+        $this->_contents = [];
 
         return $this;
     }
@@ -42,12 +43,11 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return array
      */
-    public function all( $format = null )
+    public function all($format = null)
     {
-        switch ( $format )
-        {
+        switch ($format) {
             case 'json':
-                return JsonFile::encode( $this->_contents );
+                return JsonFile::encode($this->_contents);
         }
 
         return $this->_contents;
@@ -60,24 +60,19 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return mixed Value of the key or default value
      */
-    public function get( $key = null, $defaultValue = null, $burnAfterReading = false )
+    public function get($key = null, $defaultValue = null, $burnAfterReading = false)
     {
-        if ( null === $key )
-        {
+        if (null === $key) {
             return $this->all();
         }
 
-        if ( array_key_exists( $key, $this->_contents ) )
-        {
+        if (array_key_exists($key, $this->_contents)) {
             $_value = $this->_contents[$key];
 
-            if ( $burnAfterReading )
-            {
-                unset( $this->_contents[$key] );
+            if ($burnAfterReading) {
+                unset($this->_contents[$key]);
             }
-        }
-        else
-        {
+        } else {
             $this->_contents['$key'] = $_value = $defaultValue;
         }
 
@@ -93,11 +88,10 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return Collection Returns a reference to the object
      */
-    public function set( $key, $value, $overwrite = true )
+    public function set($key, $value, $overwrite = true)
     {
-        if ( !$overwrite && array_key_exists( $key, $this->_contents ) )
-        {
-            throw new \LogicException( 'Key "' . $key . '" is read-only.' );
+        if (!$overwrite && array_key_exists($key, $this->_contents)) {
+            throw new \LogicException('Key "' . $key . '" is read-only.');
         }
 
         $this->_contents[$key] = $value;
@@ -115,23 +109,21 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return Collection
      */
-    public function add( $key, $value )
+    public function add($key, $value)
     {
-        if ( !array_key_exists( $key, $this->_contents ) )
-        {
+        if (!array_key_exists($key, $this->_contents)) {
             $this->_contents[$key] = $value;
 
             return $this;
         }
 
-        if ( is_array( $this->_contents[$key] ) )
-        {
-            $this->_contents[$key] = array_merge( $this->_contents[$key], $value );
+        if (is_array($this->_contents[$key])) {
+            $this->_contents[$key] = array_merge($this->_contents[$key], $value);
 
             return $this;
         }
 
-        $this->_contents[$key] = array($this->_contents[$key], $value);
+        $this->_contents[$key] = [$this->_contents[$key], $value];
 
         return $this;
     }
@@ -141,11 +133,10 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return Collection
      */
-    public function remove( $key )
+    public function remove($key)
     {
-        if ( isset( $this->_contents[$key] ) )
-        {
-            unset( $this->_contents[$key] );
+        if (isset($this->_contents[$key])) {
+            unset($this->_contents[$key]);
         }
 
         return $this;
@@ -156,7 +147,7 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function keys()
     {
-        return array_keys( $this->_contents );
+        return array_keys($this->_contents);
     }
 
     /**
@@ -164,9 +155,9 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return bool
      */
-    public function has( $key )
+    public function has($key)
     {
-        return array_key_exists( $key, $this->_contents );
+        return array_key_exists($key, $this->_contents);
     }
 
     /**
@@ -174,9 +165,9 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return mixed Returns the key of found value or FALSE
      */
-    public function hasValue( $value )
+    public function hasValue($value)
     {
-        return array_search( $value, $this->_contents, true );
+        return array_search($value, $this->_contents, true);
     }
 
     /**
@@ -184,7 +175,7 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return Collection
      */
-    public function replace( array $data )
+    public function replace(array $data)
     {
         $this->_contents = $data;
 
@@ -196,11 +187,10 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return Collection Returns a reference to the object.
      */
-    public function merge( $data )
+    public function merge($data)
     {
-        foreach ( $data as $key => $value )
-        {
-            $this->set( $key, $value );
+        foreach ($data as $key => $value) {
+            $this->set($key, $value);
         }
 
         return $this;
@@ -211,7 +201,7 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function getIterator()
     {
-        return new \ArrayIterator( $this->_contents );
+        return new \ArrayIterator($this->_contents);
     }
 
     /**
@@ -229,9 +219,9 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      * <p>
      * The return value will be casted to boolean if non-boolean was returned.
      */
-    public function offsetExists( $offset )
+    public function offsetExists($offset)
     {
-        return $this->has( $offset );
+        return $this->has($offset);
     }
 
     /**
@@ -246,9 +236,9 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return mixed Can return all value types.
      */
-    public function offsetGet( $offset )
+    public function offsetGet($offset)
     {
-        return $this->get( $offset );
+        return $this->get($offset);
     }
 
     /**
@@ -266,9 +256,9 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return void
      */
-    public function offsetSet( $offset, $value )
+    public function offsetSet($offset, $value)
     {
-        $this->set( $offset, $value );
+        $this->set($offset, $value);
     }
 
     /**
@@ -283,9 +273,9 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      *
      * @return void
      */
-    public function offsetUnset( $offset )
+    public function offsetUnset($offset)
     {
-        $this->remove( $offset );
+        $this->remove($offset);
     }
 
     /**
@@ -300,6 +290,6 @@ class Collection implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function count()
     {
-        return count( $this->_contents );
+        return count($this->_contents);
     }
 }

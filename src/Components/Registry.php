@@ -1,26 +1,9 @@
-<?php
-/**
- * This file is part of the DreamFactory Console Tools Library
- *
- * Copyright 2014 DreamFactory Software, Inc. <support@dreamfactory.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-namespace DreamFactory\Library\Console\Components;
+<?php namespace DreamFactory\Library\Console\Components;
 
 use DreamFactory\Library\Console\Interfaces\NodeLike;
 use DreamFactory\Library\Console\Interfaces\RegistryLike;
 use DreamFactory\Library\Utility\Exceptions\FileSystemException;
+use DreamFactory\Library\Utility\JsonFile;
 
 /**
  * Manages a JSON registry
@@ -60,12 +43,12 @@ class Registry extends Collection implements RegistryLike
      * @param string $path     The absolute path of where the registry should be stored
      * @param array  $contents Initial contents
      */
-    public function __construct( $id, $path, $contents = array() )
+    public function __construct($id, $path, $contents = [])
     {
         $this->_id = $id;
         $this->_path = $path;
 
-        parent::__construct( $contents );
+        parent::__construct($contents);
     }
 
     /**
@@ -84,7 +67,7 @@ class Registry extends Collection implements RegistryLike
      *
      * @return NodeLike
      */
-    public function initialize( $contents = array() )
+    public function initialize($contents = [])
     {
         return $this->load();
     }
@@ -98,15 +81,14 @@ class Registry extends Collection implements RegistryLike
     {
         $_filePath = $this->validateRegistryPath();
 
-        $_data = JsonFile::decodeFile( $_filePath );
+        $_data = JsonFile::decodeFile($_filePath);
 
-        if ( false === $_data || JSON_ERROR_NONE != json_last_error() )
-        {
-            throw new \RuntimeException( 'Registry invalid or corrupt.' );
+        if (false === $_data || JSON_ERROR_NONE != json_last_error()) {
+            throw new \RuntimeException('Registry invalid or corrupt.');
         }
 
         //  Add data to our bag
-        $this->merge( $_data );
+        $this->merge($_data);
 
         return $this;
     }
@@ -119,16 +101,15 @@ class Registry extends Collection implements RegistryLike
      * @return array The contents stored
      * @throws FileSystemException
      */
-    public function save( $comment = null )
+    public function save($comment = null)
     {
         $_filePath = $this->validateRegistryPath();
 
-        if ( false === file_put_contents( $_filePath, $this->all( 'json' ) ) )
-        {
-            throw new FileSystemException( 'Error saving registry: ' . $_filePath );
+        if (false === file_put_contents($_filePath, $this->all('json'))) {
+            throw new FileSystemException('Error saving registry: ' . $_filePath);
         }
 
-        $this->_path = dirname( $_filePath );
+        $this->_path = dirname($_filePath);
 
         return $this;
     }
@@ -136,17 +117,16 @@ class Registry extends Collection implements RegistryLike
     /**
      * @inheritdoc
      */
-    public static function createFromFile( $id, $path, $file, array $replacements = array() )
+    public static function createFromFile($id, $path, $file, array $replacements = [])
     {
-        if ( false === ( $_json = file_get_contents( $file ) ) )
-        {
-            throw new \InvalidArgumentException( 'The template file is invalid or does not exist.' );
+        if (false === ($_json = file_get_contents($file))) {
+            throw new \InvalidArgumentException('The template file is invalid or does not exist.');
         }
 
-        $_json = str_ireplace( array_keys( $replacements ), array_values( $replacements ), $_json );
-        $_data = JsonFile::decode( $_json );
+        $_json = str_ireplace(array_keys($replacements), array_values($replacements), $_json);
+        $_data = JsonFile::decode($_json);
 
-        return new static( $id, $path, $_data );
+        return new static($id, $path, $_data);
     }
 
     /**
@@ -164,7 +144,7 @@ class Registry extends Collection implements RegistryLike
      */
     public function getSchema()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -174,25 +154,22 @@ class Registry extends Collection implements RegistryLike
      *
      * @return string
      */
-    public function validateRegistryPath( $id = null, $path = null, $createIfNotFound = true )
+    public function validateRegistryPath($id = null, $path = null, $createIfNotFound = true)
     {
-        $_filePath = ( $path ?: $this->_path ) . DIRECTORY_SEPARATOR . ( $id ?: $this->_id ) . static::DEFAULT_CONFIG_SUFFIX;
-        $_path = dirname( $_filePath );
+        $_filePath =
+            ($path ?: $this->_path) . DIRECTORY_SEPARATOR . ($id ?: $this->_id) . static::DEFAULT_CONFIG_SUFFIX;
+        $_path = dirname($_filePath);
 
-        if ( !is_dir( $_path ) && false === mkdir( $_path, 0777, true ) )
-        {
-            throw new \RuntimeException( 'Cannot create directory "' . $_path . '" for registry.' );
+        if (!is_dir($_path) && false === mkdir($_path, 0777, true)) {
+            throw new \RuntimeException('Cannot create directory "' . $_path . '" for registry.');
         }
 
-        if ( $createIfNotFound && ( !is_file( $_filePath ) || !file_exists( $_filePath ) ) )
-        {
-            if ( false === file_put_contents( $_filePath, '{}' ) )
-            {
-                throw new \RuntimeException( 'The registry file "' . $_filePath . '" could not be created.' );
+        if ($createIfNotFound && (!is_file($_filePath) || !file_exists($_filePath))) {
+            if (false === file_put_contents($_filePath, '{}')) {
+                throw new \RuntimeException('The registry file "' . $_filePath . '" could not be created.');
             }
         }
 
         return $_filePath;
     }
-
 }
