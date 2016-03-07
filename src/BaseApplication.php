@@ -191,6 +191,8 @@ class BaseApplication extends Application
      * Retrieves one the application paths from settings. These can be "base", "config", or "vendor"
      *
      * @param string $which
+     *
+     * @return string
      */
     public function getAppPath( $which = null )
     {

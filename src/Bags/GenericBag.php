@@ -21,7 +21,7 @@ namespace DreamFactory\Library\Console\Bags;
 use DreamFactory\Library\Console\Interfaces\NodeLike;
 
 /**
- * Super simple generic array/bag. API modeled after the many Symfony2 bags
+ * Super simple generic array/bag. API modeled after the Laravel/Symfony bags
  */
 class GenericBag implements \IteratorAggregate, \Countable, NodeLike
 {
@@ -36,7 +36,7 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
     /**
      * @type array
      */
-    protected $_contents = array();
+    protected $_contents = [];
 
     //******************************************************************************
     //* Methods
@@ -48,10 +48,10 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      * @param string                    $id
      * @param \Traversable|object|array $contents An array of key value pairs to stuff into the bag
      */
-    public function __construct( $id, $contents = array() )
+    public function __construct($id, $contents = [])
     {
         $this->_id = $id;
-        $this->initialize( $contents );
+        $this->initialize($contents);
     }
 
     /**
@@ -59,7 +59,7 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return GenericBag
      */
-    public function initialize( $contents = array() )
+    public function initialize($contents = [])
     {
         $this->_contents = $contents;
 
@@ -73,7 +73,7 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      */
     public function clear()
     {
-        $this->_contents = array();
+        $this->_contents = [];
 
         return $this;
     }
@@ -85,15 +85,14 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return array|string
      */
-    public function all( $format = null )
+    public function all($format = null)
     {
-        switch ( $format )
-        {
+        switch ($format) {
             case 'json':
-                return json_encode( $this->all(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+                return json_encode($this->all(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         }
 
-        return empty( $this->_contents ) ? array() : $this->_contents;
+        return empty($this->_contents) ? [] : $this->_contents;
     }
 
     /**
@@ -103,7 +102,7 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      */
     public function keys()
     {
-        return array_keys( $this->_contents );
+        return array_keys($this->_contents);
     }
 
     /**
@@ -113,7 +112,7 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      */
     public function values()
     {
-        return array_values( $this->_contents );
+        return array_values($this->_contents);
     }
 
     /**
@@ -123,7 +122,7 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return $this
      */
-    public function replace( $contents = array() )
+    public function replace($contents = [])
     {
         $this->_contents = $contents;
 
@@ -137,9 +136,9 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return $this
      */
-    public function add( array $contents = array() )
+    public function add(array $contents = [])
     {
-        $this->_contents = array_replace( $this->_contents, $contents );
+        $this->_contents = array_replace($this->_contents, $contents);
 
         return $this;
     }
@@ -154,22 +153,19 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return mixed
      */
-    public function get( $key = null, $defaultValue = null, $burnAfterReading = false )
+    public function get($key = null, $defaultValue = null, $burnAfterReading = false)
     {
-        if ( null === $key )
-        {
+        if (null === $key) {
             return $this->all();
         }
 
         $_value = $defaultValue;
 
-        if ( false !== ( $_key = $this->has( $key ) ) )
-        {
+        if (false !== ($_key = $this->has($key))) {
             $_value = $this->_contents[$_key];
 
-            if ( $burnAfterReading )
-            {
-                $this->remove( $key );
+            if ($burnAfterReading) {
+                $this->remove($key);
             }
         }
 
@@ -185,13 +181,12 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return $this
      */
-    public function set( $key, $value, $overwrite = true )
+    public function set($key, $value, $overwrite = true)
     {
-        $_key = $this->normalizeKey( $key );
+        $_key = $this->normalizeKey($key);
 
-        if ( isset( $this->_contents[$_key] ) && !$overwrite )
-        {
-            throw new \LogicException( 'The key "' . $key . '" exists and overwrite is disabled.' );
+        if (isset($this->_contents[$_key]) && !$overwrite) {
+            throw new \LogicException('The key "' . $key . '" exists and overwrite is disabled.');
         }
 
         $this->_contents[$_key] = $value;
@@ -205,13 +200,13 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return bool|string The normalized key if found, or false
      */
-    public function has( $key, $returnNormalizedKey = true )
+    public function has($key, $returnNormalizedKey = true)
     {
-        $_key = $this->normalizeKey( $key );
+        $_key = $this->normalizeKey($key);
 
         return
-            array_key_exists( $_key, $this->_contents )
-                ? ( $returnNormalizedKey ? $_key : true )
+            array_key_exists($_key, $this->_contents)
+                ? ($returnNormalizedKey ? $_key : true)
                 : false;
     }
 
@@ -220,11 +215,10 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return bool True if the key existed and was deleted
      */
-    public function remove( $key )
+    public function remove($key)
     {
-        if ( false !== ( $_key = $this->has( $key ) ) )
-        {
-            unset( $this->_contents[$_key] );
+        if (false !== ($_key = $this->has($key))) {
+            unset($this->_contents[$_key]);
 
             return true;
         }
@@ -237,9 +231,9 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      *
      * @return string
      */
-    public function normalizeKey( $key )
+    public function normalizeKey($key)
     {
-        return strtolower( $key );
+        return strtolower($key);
     }
 
     /**
@@ -249,7 +243,7 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      */
     public function getIterator()
     {
-        return new \ArrayIterator( $this->_contents );
+        return new \ArrayIterator($this->_contents);
     }
 
     /**
@@ -259,7 +253,7 @@ class GenericBag implements \IteratorAggregate, \Countable, NodeLike
      */
     public function count()
     {
-        return count( $this->_contents );
+        return count($this->_contents);
     }
 
     /**
