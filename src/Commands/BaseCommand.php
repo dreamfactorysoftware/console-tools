@@ -20,6 +20,7 @@ namespace DreamFactory\Library\Console\Commands;
 
 use DreamFactory\Library\Console\BaseApplication;
 use DreamFactory\Library\Console\Components\Registry;
+use DreamFactory\Library\Console\Enums\AnsiCodes;
 use DreamFactory\Library\Console\Utility\Cursor;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -68,16 +69,14 @@ class BaseCommand extends ContainerAwareCommand
      * @param string $name   The name of the command
      * @param array  $config The command configuration
      */
-    public function __construct( $name = null, array $config = array() )
+    public function __construct($name = null, array $config = [])
     {
-        parent::__construct( $name );
+        parent::__construct($name);
 
         //  Spin the config options and set any known values...
-        foreach ( $config as $_key => $_value )
-        {
-            if ( method_exists( $this, 'set' . $_key ) )
-            {
-                call_user_func( array($this, 'set' . $_key), $_value );
+        foreach ($config as $_key => $_value) {
+            if (method_exists($this, 'set' . $_key)) {
+                call_user_func([$this, 'set' . $_key], $_value);
             }
         }
     }
@@ -92,12 +91,12 @@ class BaseCommand extends ContainerAwareCommand
      * @return $this
      * @throws \InvalidArgumentException When unknown output type is given
      */
-    public function write( $messages, $newline = false, $type = OutputInterface::OUTPUT_NORMAL )
+    public function write($messages, $newline = false, $type = OutputInterface::OUTPUT_NORMAL)
     {
         $this
-            ->clearArea( 'line' )
+            ->clearArea('line')
             ->_output
-            ->write( $this->_stampMessages( $messages ), $newline, $type );
+            ->write($this->_stampMessages($messages), $newline, $type);
 
         return $this;
     }
@@ -112,9 +111,9 @@ class BaseCommand extends ContainerAwareCommand
      * @return $this
      * @throws \InvalidArgumentException When unknown output type is given
      */
-    public function writeCode( $code, $value1 = 1, $value2 = 1 )
+    public function writeCode($code, $value1 = 1, $value2 = 1)
     {
-        $this->_output->write( AnsiCodes::render( $code, $value1, $value2 ) );
+        $this->_output->write(AnsiCodes::render($code, $value1, $value2));
 
         return $this;
     }
@@ -127,9 +126,9 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @return $this
      */
-    public function moveCursor( $moves, $count = 1 )
+    public function moveCursor($moves, $count = 1)
     {
-        $this->_output->write( Cursor::move( $moves, $count ) );
+        $this->_output->write(Cursor::move($moves, $count));
 
         return $this;
     }
@@ -141,9 +140,9 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @return $this
      */
-    public function clearArea( $areas )
+    public function clearArea($areas)
     {
-        $this->_output->write( Cursor::clear( $areas ) );
+        $this->_output->write(Cursor::clear($areas));
 
         return $this;
     }
@@ -157,12 +156,12 @@ class BaseCommand extends ContainerAwareCommand
      * @return $this
      * @throws \InvalidArgumentException When unknown output type is given
      */
-    public function writeln( $messages, $type = OutputInterface::OUTPUT_NORMAL )
+    public function writeln($messages, $type = OutputInterface::OUTPUT_NORMAL)
     {
         return
             $this
-                ->clearArea( 'line_end' )
-                ->write( $messages, true, $type );
+                ->clearArea('line_end')
+                ->write($messages, true, $type);
     }
 
     /**
@@ -172,12 +171,12 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @return $this
      */
-    public function writeInPlace( $message )
+    public function writeInPlace($message)
     {
         return $this
-            ->writeCode( AnsiCodes::SCP )
-            ->write( $message )
-            ->writeCode( AnsiCodes::RCP );
+            ->writeCode(AnsiCodes::SCP)
+            ->write($message)
+            ->writeCode(AnsiCodes::RCP);
     }
 
     /**
@@ -185,26 +184,20 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @return array|string
      */
-    protected function _stampMessages( $messages )
+    protected function _stampMessages($messages)
     {
-        if ( $this->_elapsedTimer )
-        {
-            if ( empty( $this->_startTime ) )
-            {
-                $this->_startTime = microtime( true );
+        if ($this->_elapsedTimer) {
+            if (empty($this->_startTime)) {
+                $this->_startTime = microtime(true);
             }
 
-            $_span = $this->_elapsed( true );
+            $_span = $this->_elapsed(true);
 
-            if ( is_array( $messages ) )
-            {
-                foreach ( $messages as $_index => $_message )
-                {
+            if (is_array($messages)) {
+                foreach ($messages as $_index => $_message) {
                     $messages[$_index] = '[' . $_span . '] ' . $_message;
                 }
-            }
-            else
-            {
+            } else {
                 $messages = '[' . $_span . '] ' . $messages;
             }
         }
@@ -216,15 +209,15 @@ class BaseCommand extends ContainerAwareCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      */
-    protected function initialize( InputInterface $input, OutputInterface $output )
+    protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        parent::initialize( $input, $output );
+        parent::initialize($input, $output);
 
         $this->_input = $input;
         $this->_output = $output;
 
         //  Mark the start time of the command
-        $this->_startTime = microtime( true );
+        $this->_startTime = microtime(true);
     }
 
     /**
@@ -232,11 +225,11 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @return float The elapsed time since the start of execution
      */
-    protected function _elapsed( $formatted = false )
+    protected function _elapsed($formatted = false)
     {
-        $_elapsed = microtime( true ) - $this->_startTime;
+        $_elapsed = microtime(true) - $this->_startTime;
 
-        return $formatted ? sprintf( static::DEFAULT_SPAN_FORMAT, $_elapsed ) : $_elapsed;
+        return $formatted ? sprintf(static::DEFAULT_SPAN_FORMAT, $_elapsed) : $_elapsed;
     }
 
     /**
@@ -247,9 +240,8 @@ class BaseCommand extends ContainerAwareCommand
         /** @type BaseApplication $_app */
         $_app = $this->getApplication();
 
-        if ( empty( $_app ) )
-        {
-            throw new \RuntimeException( 'The $application property has not been set for this command.' );
+        if (empty($_app)) {
+            throw new \RuntimeException('The $application property has not been set for this command.');
         }
 
         return $_app->getRegistry();
@@ -278,13 +270,12 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @return mixed
      */
-    public function getQueue( $configFile = null )
+    public function getQueue($configFile = null)
     {
         /** @noinspection PhpUndefinedMethodInspection */
-        $_queue = $this->getApplication()->getQueue( $configFile );
+        $_queue = $this->getApplication()->getQueue($configFile);
 
-        if ( !empty( $_queue ) )
-        {
+        if (!empty($_queue)) {
             /** @noinspection PhpUndefinedMethodInspection */
             return $_queue->getStorageProvider();
         }
@@ -305,7 +296,7 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @return BaseCommand
      */
-    public function setElapsedTimer( $elapsedTimer )
+    public function setElapsedTimer($elapsedTimer)
     {
         $this->_elapsedTimer = $elapsedTimer;
 
@@ -325,7 +316,7 @@ class BaseCommand extends ContainerAwareCommand
      *
      * @return BaseCommand
      */
-    public function setStartTime( $startTime )
+    public function setStartTime($startTime)
     {
         $this->_startTime = $startTime;
 
