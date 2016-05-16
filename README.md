@@ -1,4 +1,4 @@
-## DreamFactory Console Utilities v1.0.1
+## DreamFactory Console Utilities v1.0.2
 
 [![Latest Stable Version](https://poser.pugx.org/dreamfactory/console-tools/v/stable.svg)](https://packagist.org/packages/dreamfactory/console-tools) [![Total Downloads](https://poser.pugx.org/dreamfactory/console-tools/downloads.svg)](https://packagist.org/packages/dreamfactory/console-tools) [![Latest Unstable Version](https://poser.pugx.org/dreamfactory/console-tools/v/unstable.svg)](https://packagist.org/packages/dreamfactory/console-tools) [![License](https://poser.pugx.org/dreamfactory/console-tools/license.svg)](https://packagist.org/packages/dreamfactory/console-tools)
 
