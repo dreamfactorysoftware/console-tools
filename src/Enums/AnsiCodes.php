@@ -2,7 +2,8 @@
 /**
  * This file is part of the DreamFactory Console Tools Library
  *
- * Copyright 2014 DreamFactory Software, Inc. <support@dreamfactory.com>
+ * Copyright 2014 DreamFactory Software, Inc.
+ * <support@dreamfactory.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@
  */
 namespace DreamFactory\Library\Console\Enums;
 
-use Kisma\Core\Enums\SeedEnum;
+use DreamFactory\Library\Utility\Enums\FactoryEnum;
 
 /**
  * Enumerations of ANSI escape-code sequences. Coordinates are not zero-based.
@@ -26,7 +27,7 @@ use Kisma\Core\Enums\SeedEnum;
  *
  * @author    Jerry Ablan <jerryablan@dreamfactory.com>
  */
-class AnsiCodes extends SeedEnum
+class AnsiCodes extends FactoryEnum
 {
     //******************************************************************************
     //* Device Status

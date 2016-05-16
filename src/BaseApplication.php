@@ -21,7 +21,6 @@ namespace DreamFactory\Library\Console;
 use DreamFactory\Library\Console\Components\Collection;
 use DreamFactory\Library\Console\Components\Registry;
 use DreamFactory\Library\Console\Utility\CommandHelper;
-use Kisma\Core\Interfaces\ConsumerLike;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -31,7 +30,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Additional Settings of $configName and $configPath
  * available to customize storage location
  */
-class BaseApplication extends Application implements ConsumerLike
+class BaseApplication extends Application
 {
     //******************************************************************************
     //* Constants
@@ -192,6 +191,8 @@ class BaseApplication extends Application implements ConsumerLike
      * Retrieves one the application paths from settings. These can be "base", "config", or "vendor"
      *
      * @param string $which
+     *
+     * @return string
      */
     public function getAppPath( $which = null )
     {

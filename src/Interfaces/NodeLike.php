@@ -65,7 +65,6 @@ interface NodeLike
      * @param mixed  $defaultValue
      * @param bool   $burnAfterReading
      *
-     * @throws \Kisma\Core\Exceptions\BagException
      * @return mixed
      */
     public function get( $key = null, $defaultValue = null, $burnAfterReading = false );
@@ -75,7 +74,6 @@ interface NodeLike
      * @param mixed  $value
      * @param bool   $overwrite
      *
-     * @throws \Kisma\Core\Exceptions\BagException
      * @return NodeLike
      */
     public function set( $key, $value, $overwrite = true );
