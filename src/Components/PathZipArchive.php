@@ -18,8 +18,7 @@
  */
 namespace DreamFactory\Library\Console;
 
-use Kisma\Core\Exceptions\FileSystemException;
-use Kisma\Core\Utility\Log;
+use DreamFactory\Library\Utility\Exceptions\FileSystemException;
 
 /**
  * Manipulates a zip of a path
@@ -52,7 +51,6 @@ class PathZipArchive extends \ZipArchive
      * @param string $localName
      * @param bool   $checksum If true, an MD5 checksum of the file will be returned
      *
-     * @throws FileSystemException
      * @return string|null If $checksum is true, the MD5 checksum of the created zip is returned, otherwise null.
      */
     public function backup( $sourcePath, $localName = null, $checksum = false )
@@ -96,16 +94,7 @@ class PathZipArchive extends \ZipArchive
             throw new FileSystemException( 'Unable to open zip file "' . $this->_zipFileName . '". Error code: ' . $_result );
         }
 
-        try
-        {
-            $this->extractTo( $_path );
-        }
-        catch ( \Exception $_ex )
-        {
-            Log::error( 'Exception unzipping archive: ' . $_ex->getMessage() );
-            throw $_ex;
-        }
-
+        $this->extractTo( $_path );
         $this->close();
 
         return true;
