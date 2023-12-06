@@ -1,0 +1,128 @@
+repo_name: dreamfactorysoftware/console-tools
+report_id: 763651dba2dd44eb05061bd8312dd95f
+repo_type: Public
+timestamp: '2023-12-06T22:36:29+00:00'
+requested_by: chas688
+provider: github
+branch: master
+detected_tools_count: 10
+tools:
+- name: PHP
+  description: A popular general-purpose scripting language that is especially suited
+    to web development
+  website_url: http://www.php.net/
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/991/hwUcGZ41_400x400.jpg
+  detection_source: Repo Metadata
+- name: Symfony
+  description: A PHP full-stack web framework
+  website_url: http://symfony.com/
+  version: '2.4'
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Frameworks (Full Stack)
+  image_url: https://img.stackshare.io/service/1197/logosf_positif_03_icon.png
+  detection_source_url: github.com/dreamfactorysoftware/console-tools/blob/master/composer.json
+  detection_source: composer.json
+  last_updated_by: Jerry Ablan
+  last_updated_on: 2016-03-07 00:50:43.000000000 Z
+- name: Git
+  description: Fast, scalable, distributed revision control system
+  website_url: http://git-scm.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Version Control System
+  image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source: Repo Metadata
+- name: PHPUnit
+  description: Testing framework for PHP
+  website_url: https://phpunit.de/
+  license: BSD-3-Clause
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Testing Frameworks
+  image_url: https://img.stackshare.io/service/1616/1_WsEnddd5Y4EgEHsT054kUQ.jpeg
+  detection_source: composer.json
+  last_updated_by: Jerry Ablan
+  last_updated_on: 2014-08-29 20:55:42.000000000 Z
+- name: Shell
+  description: A shell is a text-based terminal, used for manipulating programs and
+    files. Shell scripts typically manage program execution.
+  website_url: https://en.wikipedia.org/wiki/Shell_script
+  open_source: false
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/4631/default_c2062d40130562bdc836c13dbca02d318205a962.png
+  detection_source: Repo Metadata
+- name: illuminate/console
+  description: The Illuminate Console package
+  package_url: https://packagist.org/illuminate/console
+  version: '5.1'
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Package Managers
+  image_url: https://img.stackshare.io/package/packagist/image.png
+  detection_source_url: github.com/dreamfactorysoftware/console-tools/blob/master/composer.json
+  detection_source: composer.json
+  last_updated_by: Jerry Ablan
+  last_updated_on: 2016-03-07 00:50:43.000000000 Z
+- name: illuminate/contracts
+  description: The Illuminate Contracts package
+  package_url: https://packagist.org/illuminate/contracts
+  version: '5.1'
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Package Managers
+  image_url: https://img.stackshare.io/package/packagist/image.png
+  detection_source_url: github.com/dreamfactorysoftware/console-tools/blob/master/composer.json
+  detection_source: composer.json
+  last_updated_by: Jerry Ablan
+  last_updated_on: 2016-03-07 00:50:43.000000000 Z
+- name: illuminate/database
+  description: The Illuminate Database package
+  package_url: https://packagist.org/illuminate/database
+  version: '5.1'
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Package Managers
+  image_url: https://img.stackshare.io/package/packagist/image.png
+  detection_source_url: github.com/dreamfactorysoftware/console-tools/blob/master/composer.json
+  detection_source: composer.json
+  last_updated_by: Jerry Ablan
+  last_updated_on: 2016-03-07 00:50:43.000000000 Z
+- name: phpunit/phpunit
+  description: The PHP Unit Testing framework
+  package_url: https://packagist.org/phpunit/phpunit
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Package Managers
+  image_url: https://img.stackshare.io/package/packagist/image.png
+  detection_source: composer.json
+  last_updated_by: Jerry Ablan
+  last_updated_on: 2016-03-07 00:50:43.000000000 Z
+- name: symfony/framework-bundle
+  description: Provides a tight integration between Symfony components and the Symfony
+    full-stack framework
+  package_url: https://packagist.org/symfony/framework-bundle
+  version: '2.4'
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Package Managers
+  image_url: https://img.stackshare.io/package/packagist/image.png
+  detection_source_url: github.com/dreamfactorysoftware/console-tools/blob/master/composer.json
+  detection_source: composer.json
+  last_updated_by: Jerry Ablan
+  last_updated_on: 2016-03-07 00:50:43.000000000 Z
